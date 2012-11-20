@@ -32,14 +32,14 @@
 					mouseX = parseInt(e.pageX - parentOffset.left);
 					mouseY = parseInt(e.pageY - parentOffset.top);
 					
-					angle = getAngle(parseInt(spriteX+16),parseInt(spriteY+16),mouseX,mouseY);
+					angle = getAngle(parseInt(spriteX),parseInt(spriteY),mouseX,mouseY);
 					$('#target').rotate(angle*-1);
 
-					speed = Math.round( ( Math.round(Math.abs(mouseX - spriteX + 16)) + Math.round(Math.abs(mouseY - spriteY + 16)) ) / 75);
+					speed = parseInt(Math.round( ( Math.round(Math.abs(mouseX - spriteX)) + Math.round(Math.abs(mouseY - spriteY)) ) / 25)/2);
 					if( speed > SPEED_MAX ) {
 						speed = SPEED_MAX;
 					} else if( speed <= 0 ) {
-						speed = 1;
+						speed = 0;
 					}
 				});
 				
@@ -50,14 +50,13 @@
 						var dY = Math.round(speed * Math.sin(theta));
 						spriteX += dX;
 						spriteY -= dY;
-						console.log(speed);
-						speed = Math.round( ( Math.round(Math.abs(mouseX - spriteX + 16)) + Math.round(Math.abs(mouseY - spriteY + 16)) ) / 50);
+						speed = Math.round( ( Math.round(Math.abs(mouseX - spriteX)) + Math.round(Math.abs(mouseY - spriteY)) ) / 50);
 						if( speed > SPEED_MAX ) {
 							speed = SPEED_MAX;
 						}
 						$('#target').css({
-							'top': parseInt(spriteY+16)+'px',
-							'left': parseInt(spriteX+16)+'px'
+							'top': parseInt(spriteY-16)+'px',
+							'left': parseInt(spriteX-16)+'px'
 						});
 					}
 				});
