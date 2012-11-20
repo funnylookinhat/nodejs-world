@@ -10,7 +10,9 @@
 		<script type="text/javascript">
 			function getAngle(x1,y1,x2,y2)
 			{
-				var angle = parseInt(Math.atan2(parseInt(x1 - x2), parseInt(y1 - y2)) / Math.PI * 180) + 90;
+				var dX = Math.round(x1 - x2);
+				var dY = Math.round(y1 - y2);
+				var angle = Math.round(Math.atan2(dX, dY) / Math.PI * 180) + 90;
 				if( angle < 0 ) {
 					angle += 360;
 				}
@@ -21,24 +23,38 @@
 				var angle = 0;
 				var spriteX = 450;
 				var spriteY = 250;
-				
+				var SPEED_MAX = 8;
+				var speed = 0;
+				var mouseX = 0;
+				var mouseY = 0;
 				$('#wrapper').mousemove(function(e) {
 					var parentOffset = $(this).offset(); 
-					var mouseX = parseInt(e.pageX - parentOffset.left);
-					var mouseY = parseInt(e.pageY - parentOffset.top);
+					mouseX = parseInt(e.pageX - parentOffset.left);
+					mouseY = parseInt(e.pageY - parentOffset.top);
 					
 					angle = getAngle(parseInt(spriteX+16),parseInt(spriteY+16),mouseX,mouseY);
 					$('#target').rotate(angle*-1);
+
+					speed = Math.round( ( Math.round(Math.abs(mouseX - spriteX + 16)) + Math.round(Math.abs(mouseY - spriteY + 16)) ) / 75);
+					if( speed > SPEED_MAX ) {
+						speed = SPEED_MAX;
+					} else if( speed <= 0 ) {
+						speed = 1;
+					}
 				});
-				var speed = 4;
+				
 				$(document).keydown(function(event){
 					if( event.keyCode == 87 ) { // w
 						var theta = angle * Math.PI / 180
-						var dX = speed * Math.cos(theta);
-						var dY = speed * Math.sin(theta);
+						var dX = Math.round(speed * Math.cos(theta));
+						var dY = Math.round(speed * Math.sin(theta));
 						spriteX += dX;
 						spriteY -= dY;
-						
+						console.log(speed);
+						speed = Math.round( ( Math.round(Math.abs(mouseX - spriteX + 16)) + Math.round(Math.abs(mouseY - spriteY + 16)) ) / 50);
+						if( speed > SPEED_MAX ) {
+							speed = SPEED_MAX;
+						}
 						$('#target').css({
 							'top': parseInt(spriteY+16)+'px',
 							'left': parseInt(spriteX+16)+'px'
