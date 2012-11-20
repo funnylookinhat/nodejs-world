@@ -1,0 +1,89 @@
+<html>
+	<body>
+
+		<div id="wrapper">
+			<img src="sprite.png" id="target">
+		</div>
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script src="jQueryRotate.2.2.js"></script>
+		<script type="text/javascript">
+			function getAngle(x1,y1,x2,y2)
+			{
+				var angle = parseInt(Math.atan2(parseInt(x1 - x2), parseInt(y1 - y2)) / Math.PI * 180) + 90;
+				if( angle < 0 ) {
+					angle += 360;
+				}
+				return angle;
+			}
+
+			$(function() {
+				var angle = 0;
+				var spriteX = 450;
+				var spriteY = 250;
+				
+				$('#wrapper').mousemove(function(e) {
+					var parentOffset = $(this).offset(); 
+					var mouseX = parseInt(e.pageX - parentOffset.left);
+					var mouseY = parseInt(e.pageY - parentOffset.top);
+					
+					angle = getAngle(parseInt(spriteX+16),parseInt(spriteY+16),mouseX,mouseY);
+					$('#target').rotate(angle*-1);
+				});
+				$(document).keydown(function(event){
+					if( event.keyCode == 87 ) { // w
+						if( angle >= 338 || angle < 23 ) {
+							spriteX += 1;
+						} else if( angle >= 23 && angle < 68 ) {
+							spriteX += 1;
+							spriteY -= 1;
+						} else if( angle >= 68 && angle < 113 ) {
+							spriteY -= 1;
+						} else if( angle >= 113 && angle < 158 ) {
+							spriteY -= 1;
+							spriteX -= 1;
+						} else if( angle >= 158 && angle < 203 ) {
+							spriteX -= 1;
+						} else if( angle >= 203 && angle < 248 ) {
+							spriteX -= 1;
+							spriteY += 1;
+						} else if( angle >= 248 && angle < 293 ) {
+							spriteY += 1;
+						} else if( angle >= 293 && angle < 338 ) {
+							spriteY += 1;
+							spriteX += 1;
+						} else {
+							// Invalid angle.
+						}
+						$('#target').css({
+							'top': parseInt(spriteY+16)+'px',
+							'left': parseInt(spriteX+16)+'px'
+						});
+					}
+				});
+			});
+
+		</script>
+
+		<style>
+			body {
+				overflow: hidden;
+				margin: 0;
+				padding: 0;
+				background: #414141;
+			}
+			#wrapper {
+				height: 100%;
+				margin: 0;
+				padding: 0;
+				position: relative;
+			}
+			#target {
+				width: 32px;
+				position: absolute;
+				top: 234px;
+				left: 434px;
+			}
+		</style>
+	</body>
+</html>
