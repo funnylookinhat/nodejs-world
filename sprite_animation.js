@@ -24,7 +24,7 @@ image.src = "sprites/steampunk_m1.png";
 
 image.onload = function() {
 	//we're ready for the loop
-	setInterval(loop, 5000 / 30);
+	setInterval(loop, 7000 / 30);
 }
 
 
@@ -32,12 +32,16 @@ function loop() {
 
 	c.clearRect(0,0, SCREEN_WIDTH,SCREEN_HEIGHT);
 
+	c.drawImage(image,xpos,ypos,frameWidth,frameHeight,300,300,frameWidth, frameHeight);
+
+	/*
 	for( var ix = 15; ix < 1365; ix += 50 ) {
 		for ( var iy = 15; iy < 665; iy += 50 ) {
 			ypos = frameHeight*Math.floor( ( iy + ix ) / 50 % 4 );
 			c.drawImage(image,xpos,ypos,frameWidth,frameHeight,ix,iy,frameWidth, frameHeight);
 		}
 	}
+	*/
 
 	xpos += frameWidth;
 
