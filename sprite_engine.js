@@ -59,21 +59,21 @@ function drawFrame(canvas, context, entities, fps, frame) {
 		} else {
 			ypos = 0; // ??!
 		}
-		ypos = ypos * frameHeight;
+		ypos = ypos * ( entities[i].image.height / numFrames );
 		
 		// Should account for speed ?
-		xpos = frameWidth * ( Math.floor( frame * numFrames / fps ) > 3 ? 3 : Math.floor( frame * numFrames / fps ) );
+		xpos = ( entities[i].image.width / numFrames ) * ( Math.floor( frame * numFrames / fps ) > 3 ? 3 : Math.floor( frame * numFrames / fps ) );
 
 		context.drawImage(
 			entities[i].image, 
 			xpos, 
 			ypos, 
-			frameWidth, 
-			frameHeight, 
+			( entities[i].image.width / numFrames ), 
+			( entities[i].image.height / numFrames ), 
 			entities[i].x, 
 			entities[i].y, 
-			frameWidth, 
-			frameHeight);
+			( entities[i].image.width / numFrames ), 
+			( entities[i].image.height / numFrames ));
 	}
 }
 
@@ -94,7 +94,6 @@ function updateFrame(entities) {
 			}
 		}
 	}
-	console.log(entities[0].x.toString()+','+entities[0].y.toString()+' ::: '+entities[0].angle);
 	return entities;
 }
 
@@ -118,17 +117,19 @@ document.body.appendChild(canvas);
 //load the test sprites
 var entities = [];
 
-for( var q = 1; q <= 24; q++ ) {
-	image = new Image();
-	image.src = "sprites/steampunk_m1.png";
-
-	entities[q] = {
-		x: Math.floor( Math.random() * ( SCREEN_WIDTH - 200 ) ) + 100,
-		y: Math.floor( Math.random() * ( SCREEN_HEIGHT - 200 ) ) + 100,
-		angle: Math.floor( Math.random() * 360 ),
-		speed: Math.floor( Math.random() * 8 ) + 1,
-		image: image
-	};	
+for( var r = 1; r <= 2; r++ ) {
+	for( var q = 1; q <= 12; q++ ) {
+		image = new Image();
+		image.src = "sprites/steampunk_m"+q.toString()+".png";
+		
+		entities[q*r] = {
+			x: Math.floor( Math.random() * ( SCREEN_WIDTH - 200 ) ) + 100,
+			y: Math.floor( Math.random() * ( SCREEN_HEIGHT - 200 ) ) + 100,
+			angle: Math.floor( Math.random() * 360 ),
+			speed: Math.floor( Math.random() * 8 ) + 1,
+			image: image
+		};	
+	}
 }
 
 
