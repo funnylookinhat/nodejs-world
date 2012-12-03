@@ -44,9 +44,15 @@ function drawFrame(canvas, context, character, entities, fps, frame) {
 	context.clearRect(0, 0, canvas.width, canvas.height);
 
 	var frameXMin = character.x - Math.floor( context.canvas.width / 2 );
+	if( frameXMin < 0 ) {
+		frameXMin = 0;
+	}
 	var frameXMax = frameXMin + context.canvas.width;
 
 	var frameYMin = character.y - Math.floor( context.canvas.height / 2 );
+	if( frameYMin < 0 ) {
+		frameYMin = 0;
+	}
 	var frameYMax = frameYMin + context.canvas.width;
 
 	var frameBox = {
@@ -160,10 +166,10 @@ grassImage.src = "resources/grass.png";
 function drawSceneBackground(context, frameBox) {
 	var grassPattern = context.createPattern(grassImage,"repeat");
 	context.rect(
-		0, 
-		0, 
-		context.canvas.width, 
-		context.canvas.height
+		( -1 * context.canvas.width % grassImage.width ),//0, 
+		( -1 * context.canvas.height % grassImage.height ),//0, 
+		context.canvas.width + ( context.canvas.width % grassImage.width ), 
+		context.canvas.height + ( context.canvas.height % grassImage.height )
 	);
 	context.fillStyle = grassPattern;
 	context.fill();
@@ -202,7 +208,18 @@ function fitCanvas(canvas,win) {
 // Simple motion simulation.
 function updateFrame(entities) {
 	character.x += getDx(character.angle,character.speed);
-	character.y -= getDy(character.angle,character.speed);	
+	character.y -= getDy(character.angle,character.speed);
+	if( character.x <= 20 ) {
+		character.x = 20;
+	} else if ( character.x >= ( WORLD_WIDTH - 20 ) ) {
+		character.x = ( WORLD_WIDTH - 20 );
+	}
+	if( character.y <= 20 ) {
+		character.y = 20;
+	} else if ( character.y >= ( WORLD_HEIGHT - 20 ) ) {
+		character.y = ( WORLD_HEIGHT - 20 );
+	}
+
 	for( i in entities ) {
 		entities[i].x += getDx(entities[i].angle,entities[i].speed);
 		entities[i].y -= getDy(entities[i].angle,entities[i].speed);
@@ -298,8 +315,8 @@ for( var r = 1; r <= 50; r++ ) {
 var characterImage = new Image();
 characterImage.src = "sprites/steampunk_m8.png";
 var character = {
-	x: 5000,
-	y: 5000,
+	x: 500,
+	y: 500,
 	angle: 270,
 	speed: 0,
 	image: characterImage
