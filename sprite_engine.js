@@ -172,15 +172,38 @@ var grassImage = new Image();
 grassImage.src = "resources/grass.png";	
 
 function drawSceneBackground(context, frameBox) {
+	
 	var grassPattern = context.createPattern(grassImage,"repeat");
+	
+	// This code allows the grass to "scroll"
+	context.translate(
+		( ( frameBox.xmin % grassImage.width ) * -1 ),
+		( ( frameBox.ymin % grassImage.height ) * -1 )
+	);
 	context.rect(
-		( -1 * context.canvas.width % grassImage.width ),//0, 
-		( -1 * context.canvas.height % grassImage.height ),//0, 
-		context.canvas.width + ( context.canvas.width % grassImage.width ), 
-		context.canvas.height + ( context.canvas.height % grassImage.height )
+		0,//( ( frameBox.xmin % grassImage.width ) * -1 ),//( -1 * context.canvas.width % grassImage.width ),//0, 
+		0,//( ( frameBox.ymin % grassImage.height ) * -1 ),//( -1 * context.canvas.height % grassImage.height ),//0, 
+		context.canvas.width + ( grassImage.width ), 
+		context.canvas.height + ( grassImage.height )
 	);
 	context.fillStyle = grassPattern;
 	context.fill();
+	
+	context.translate(
+		( ( frameBox.xmin % grassImage.width ) * 1 ),
+		( ( frameBox.ymin % grassImage.height ) * 1 )
+	);
+	// LOOKS RIGHT - BUT CPU THROUGH THE ROOF!
+	/*
+	for( var x = (( frameBox.xmin % grassImage.width ) * -1 ); x <= context.canvas.width; x += grassImage.width ) {
+		for( var y = (( frameBox.ymin % grassImage.height ) * -1 ); y <= context.canvas.height; y += grassImage.height ) {
+			context.drawImage(
+				grassImage,
+				x,
+				y);
+		}
+	}
+	*/
 
 	for( i in clutters ) {
 		if( inBox(clutters[i],frameBox) ) {
