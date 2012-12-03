@@ -48,12 +48,20 @@ function drawFrame(canvas, context, character, entities, fps, frame) {
 		frameXMin = 0;
 	}
 	var frameXMax = frameXMin + context.canvas.width;
+	if( frameXMax > WORLD_WIDTH ) {
+		frameXMax = WORLD_WIDTH;
+		frameXMin = frameXMax - context.canvas.width;
+	}
 
 	var frameYMin = character.y - Math.floor( context.canvas.height / 2 );
 	if( frameYMin < 0 ) {
 		frameYMin = 0;
 	}
-	var frameYMax = frameYMin + context.canvas.width;
+	var frameYMax = frameYMin + context.canvas.height;
+	if( frameYMax > WORLD_HEIGHT ) {
+		frameYMax = WORLD_HEIGHT;
+		frameYMin = frameYMax - context.canvas.height;
+	}
 
 	var frameBox = {
 		'xmin': frameXMin,
@@ -315,8 +323,8 @@ for( var r = 1; r <= 50; r++ ) {
 var characterImage = new Image();
 characterImage.src = "sprites/steampunk_m8.png";
 var character = {
-	x: 500,
-	y: 500,
+	x: 9500,
+	y: 9500,
 	angle: 270,
 	speed: 0,
 	image: characterImage
