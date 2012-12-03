@@ -24,7 +24,7 @@ image.src = "sprites/steampunk_m1.png";
 
 image.onload = function() {
 	//we're ready for the loop
-	setInterval(loop, 7000 / 30);
+	setInterval(loop, 3000 / 30);
 }
 
 
