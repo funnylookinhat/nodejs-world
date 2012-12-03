@@ -323,8 +323,8 @@ for( var r = 1; r <= 50; r++ ) {
 var characterImage = new Image();
 characterImage.src = "sprites/steampunk_m8.png";
 var character = {
-	x: 9500,
-	y: 9500,
+	x: 500,
+	y: 500,
 	angle: 270,
 	speed: 0,
 	image: characterImage
