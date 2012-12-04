@@ -151,21 +151,21 @@ function drawCharacter(context,frameBox,fps,frame) {
 }
 
 function inBox(item,box) {
-	if( item.x >= (box.xmin-50) &&
-		item.x <= (box.xmax+50) &&
-		item.y >= (box.ymin-50) &&
-		item.y <= (box.ymax+50) ) {
+	if( item.x >= (box.xmin - Math.floor( item.image.width / 2 ) )  &&
+		item.x <= (box.xmax + Math.floor( item.image.width / 2 )) &&
+		item.y >= (box.ymin - Math.floor( item.image.height / 2 )) &&
+		item.y <= (box.ymax + Math.floor( item.image.height / 2 )) ) {
 		return true;
 	}
 	return false;
 }
 
 function inBoxCoordinateX(item,box) {
-	return Math.floor(item.x - box.xmin);
+	return Math.floor(item.x - Math.floor( item.image.width / 2 ) - box.xmin);
 }
 
 function inBoxCoordinateY(item,box) {
-	return Math.floor(item.y - box.ymin);
+	return Math.floor(item.y - Math.floor( item.image.height / 2 ) - box.ymin);
 }
 
 var grassImage = new Image();
@@ -176,6 +176,7 @@ function drawSceneBackground(context, frameBox) {
 	var grassPattern = context.createPattern(grassImage,"repeat");
 	
 	// This code allows the grass to "scroll"
+	// STILL A BIT SLOW
 	context.translate(
 		( ( frameBox.xmin % grassImage.width ) * -1 ),
 		( ( frameBox.ymin % grassImage.height ) * -1 )
@@ -329,7 +330,7 @@ for( var i = 0; i < 500; i++ ) {
 var entities = [];
 
 for( var r = 1; r <= 50; r++ ) {
-	for( var q = 1; q <= 6; q++ ) {
+	for( var q = 2; q <= 12; q++ ) {
 		image = new Image();
 		image.src = "sprites/steampunk_m"+q.toString()+".png";
 		
@@ -344,7 +345,7 @@ for( var r = 1; r <= 50; r++ ) {
 }
 
 var characterImage = new Image();
-characterImage.src = "sprites/steampunk_m8.png";
+characterImage.src = "sprites/steampunk_m1.png";
 var character = {
 	x: 500,
 	y: 500,
