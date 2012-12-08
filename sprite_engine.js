@@ -26,6 +26,32 @@ function getDy(angle,speed) {
 	return Math.round(10 * speed * Math.sin(theta)) / 10;
 }
 
+function roundRect(context, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke == "undefined" ) {
+    stroke = true;
+  }
+  if (typeof radius === "undefined") {
+    radius = 5;
+  }
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.lineTo(x + width - radius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + radius);
+  context.lineTo(x + width, y + height - radius);
+  context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  context.lineTo(x + radius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - radius);
+  context.lineTo(x, y + radius);
+  context.quadraticCurveTo(x, y, x + radius, y);
+  context.closePath();
+  if (stroke) {
+    context.stroke();
+  }
+  if (fill) {
+    context.fill();
+  }        
+}
+
 
 // Entities Array
 // 	x
@@ -108,8 +134,8 @@ function drawEntities(context,frameBox,fps,frame) {
 				ypos, 
 				( entities[i].image.width / numFrames ), 
 				( entities[i].image.height / numFrames ), 
-				inBoxCoordinateX(entities[i],frameBox), 
-				inBoxCoordinateY(entities[i],frameBox), 
+				inBoxEntityCoordinateX(entities[i],frameBox), 
+				inBoxEntityCoordinateY(entities[i],frameBox), 
 				( entities[i].image.width / numFrames ), 
 				( entities[i].image.height / numFrames ));
 		}
@@ -144,10 +170,25 @@ function drawCharacter(context,frameBox,fps,frame) {
 		ypos,
 		( character.image.width / numFrames ), 
 		( character.image.height / numFrames ), 
-		inBoxCoordinateX(character,frameBox), //character.x,//Math.floor( Math.floor(context.canvas.width / 2) - ( character.image.width / numFrames / 2 ) ), 
-		inBoxCoordinateY(character,frameBox), //character.y,//Math.floor( Math.floor(context.canvas.height / 2) - ( character.image.height / numFrames / 2 ) ), 
+		inBoxEntityCoordinateX(character,frameBox), //character.x,//Math.floor( Math.floor(context.canvas.width / 2) - ( character.image.width / numFrames / 2 ) ), 
+		inBoxEntityCoordinateY(character,frameBox), //character.y,//Math.floor( Math.floor(context.canvas.height / 2) - ( character.image.height / numFrames / 2 ) ), 
 		( character.image.width / numFrames ), 
 		( character.image.height / numFrames ));
+
+	var rectPos = {
+		x: character.x,
+		y: character.y - 50,
+		width: 250,
+		height: 35
+	};
+	context.strokeStyle = "rgba(0, 0, 0, .5)";
+	context.fillStyle = "rgba(0, 0, 0, .3)";
+	roundRect(context, inBoxCoordinateX(rectPos,frameBox),inBoxCoordinateY(rectPos,frameBox), rectPos.width, rectPos.height, 10, true, true); 
+	context.font = "normal 14px Arial";
+	context.fillStyle = "rgba(255,255,255,1)";
+	rectPos.y += 23;
+	rectPos.x += 5;
+	context.fillText("Here is my message...",inBoxCoordinateX(rectPos,frameBox),inBoxCoordinateY(rectPos,frameBox));
 }
 
 function inBox(item,box) {
@@ -161,11 +202,29 @@ function inBox(item,box) {
 }
 
 function inBoxCoordinateX(item,box) {
-	return Math.floor(item.x - Math.floor( item.image.width / 2 ) - box.xmin);
+	if( item.image ) {
+		return Math.floor(item.x - Math.floor( item.image.width / 2 ) - box.xmin);
+	} else if ( item.width ) {
+		return Math.floor(item.x - Math.floor( item.width / 2 ) - box.xmin);
+	}
+	return Math.floor(item.x - box.xmin);
 }
 
 function inBoxCoordinateY(item,box) {
-	return Math.floor(item.y - Math.floor( item.image.height / 2 ) - box.ymin);
+	if( item.image ) {
+		return Math.floor(item.y - Math.floor( item.image.height / 2 ) - box.ymin);
+	} else if ( item.height ) {
+		return Math.floor(item.y - Math.floor( item.height / 2 ) - box.ymin);
+	}
+	return Math.floor(item.y - box.ymin);
+}
+
+function inBoxEntityCoordinateX(item,box) {
+	return Math.floor(item.x - Math.floor( item.image.width / numFrames / 2 ) - box.xmin);
+}
+
+function inBoxEntityCoordinateY(item,box) {
+	return Math.floor(item.y - Math.floor( item.image.height / numFrames / 2 ) - box.ymin);
 }
 
 var grassImage = new Image();
@@ -251,7 +310,7 @@ function updateFrame(entities) {
 	} else if ( character.y >= ( WORLD_HEIGHT - 20 ) ) {
 		character.y = ( WORLD_HEIGHT - 20 );
 	}
-
+	
 	for( i in entities ) {
 		entities[i].x += getDx(entities[i].angle,entities[i].speed);
 		entities[i].y -= getDy(entities[i].angle,entities[i].speed);
