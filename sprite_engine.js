@@ -483,17 +483,27 @@ function updateCharacterSpeedAngle() {
  * INPUT
  */
 
-var arrowKeys = [37,38,39,40];
+var arrowKeys = [37,38,39,40,87,65,83,68];
 var arrowKeysValues = [];
 arrowKeysValues[37] = [-1,0];
 arrowKeysValues[38] = [0,-1];
 arrowKeysValues[39] = [1,0];
 arrowKeysValues[40] = [0,1];
+
+arrowKeysValues[65] = [-1,0];
+arrowKeysValues[87] = [0,-1];
+arrowKeysValues[68] = [1,0];
+arrowKeysValues[83] = [0,1];
+
 var arrowKeysCurrent = [];
 arrowKeysCurrent[37] = null;
 arrowKeysCurrent[38] = null;
 arrowKeysCurrent[39] = null;
 arrowKeysCurrent[40] = null;
+arrowKeysCurrent[65] = null;
+arrowKeysCurrent[87] = null;
+arrowKeysCurrent[68] = null;
+arrowKeysCurrent[83] = null;
 
 $(function() {
 	$(document).keydown(function (e) {
@@ -502,6 +512,8 @@ $(function() {
 			arrowKeysCurrent[keyCode] == null ) {
 			arrowKeysCurrent[keyCode] = arrowKeysValues[keyCode];
 			updateCharacterSpeedAngle();
+		} else {
+			console.log(keyCode);
 		}
 	});
 	$(document).keyup(function (e) {
