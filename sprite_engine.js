@@ -434,7 +434,7 @@ for( var i = 0; i < 500; i++ ) {
 //load the test sprites
 var entities = [];
 
-for( var r = 1; r <= 5000; r++ ) {
+for( var r = 1; r <= 50; r++ ) {
 	for( var q = 2; q <= 12; q++ ) {
 		image = new Image();
 		image.src = "sprites/steampunk_m"+q.toString()+".png";
