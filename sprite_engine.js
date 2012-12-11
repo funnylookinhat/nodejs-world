@@ -103,6 +103,8 @@ function drawFrame(canvas, context, character, entities, fps, frame) {
 	drawCharacter(context,frameBox,fps,frame);
 
 	drawSceneForeground(context,frameBox);
+
+	drawChatWindow(context);
 }
 
 function drawEntities(context,frameBox,fps,frame) {
@@ -175,20 +177,64 @@ function drawCharacter(context,frameBox,fps,frame) {
 		( character.image.width / numFrames ), 
 		( character.image.height / numFrames ));
 
+
+	drawMessage(
+		context,
+		frameBox,
+		character,
+		"Here is my message... WITH LOTS OF EXTRA TEXT THAT SHOULD GET CUT OFF..."
+	);
+
+	
+}
+
+function drawMessage(context,frameBox,character,text) {
+	var tempCanvas = document.createElement('canvas');
+	var tempContext = tempCanvas.getContext('2d');
+	tempContext.font = "normal 14px Arial";
+	tempContext.fillStyle = "rgba(33,33,33,1)";
+	tempContext.fillText(text,0,14);
+
 	var rectPos = {
 		x: character.x,
 		y: character.y - 50,
 		width: 250,
 		height: 35
 	};
-	context.strokeStyle = "rgba(0, 0, 0, .5)";
-	context.fillStyle = "rgba(0, 0, 0, .3)";
+	context.strokeStyle = "rgba(255, 255, 255, 1)";
+	context.fillStyle = "rgba(255, 255, 255, .8)";
 	roundRect(context, inBoxCoordinateX(rectPos,frameBox),inBoxCoordinateY(rectPos,frameBox), rectPos.width, rectPos.height, 10, true, true); 
-	context.font = "normal 14px Arial";
-	context.fillStyle = "rgba(255,255,255,1)";
-	rectPos.y += 23;
-	rectPos.x += 5;
-	context.fillText("Here is my message...",inBoxCoordinateX(rectPos,frameBox),inBoxCoordinateY(rectPos,frameBox));
+	context.drawImage(
+		tempCanvas,
+		0,
+		0,
+		240,
+		24,
+		inBoxCoordinateX(rectPos,frameBox),
+		(inBoxCoordinateY(rectPos,frameBox)+10),
+		240,
+		24);
+}
+
+function drawChatWindow(context) {
+	var tempCanvas = document.createElement('canvas');
+	tempCanvas.width = 500;
+	tempCanvas.height = 500;
+	var tempContext = tempCanvas.getContext('2d');
+	tempContext.fillStyle = "rgba(50,50,50,.3)";
+	tempContext.strokeStyle = "rgba(50,50,50,.3)";
+	tempContext.fillRect(0,0,500,200);
+
+	context.drawImage(
+		tempCanvas,
+		0,
+		0,
+		500,
+		200,
+		5,
+		(context.canvas.height - 205),
+		500,
+		200);
 }
 
 function inBox(item,box) {
@@ -388,7 +434,7 @@ for( var i = 0; i < 500; i++ ) {
 //load the test sprites
 var entities = [];
 
-for( var r = 1; r <= 50; r++ ) {
+for( var r = 1; r <= 5000; r++ ) {
 	for( var q = 2; q <= 12; q++ ) {
 		image = new Image();
 		image.src = "sprites/steampunk_m"+q.toString()+".png";
@@ -488,3 +534,15 @@ setInterval( (function() {
 		( frame < FPS ? ++frame : frame = 0 ) );
 	entities = updateFrame(entities);
 }), 1000 / FPS );
+
+
+$(function() {
+	$(document).click(function(e) {
+		var newX = e.pageX + character.x - Math.floor( context.canvas.width / 2 );
+		var newY = e.pageY + character.y - Math.floor( context.canvas.height / 2 );
+		for( i in entities ) {
+			entities[i].x = newX;
+			entities[i].y = newY;
+		}
+	});
+});
