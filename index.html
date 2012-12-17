@@ -1,87 +1,19 @@
 <html>
 	<body>
-
-		<div id="wrapper">
-			<img src="sprite-rotated.png" id="target">
-		</div>
-
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-		<script src="jQueryRotate.2.2.js"></script>
-		<script type="text/javascript">
-			function getAngle(x1,y1,x2,y2)
-			{
-				var dX = Math.round(x1 - x2);
-				var dY = Math.round(y1 - y2);
-				var angle = Math.round(Math.atan2(dX, dY) / Math.PI * 180) + 90;
-				if( angle < 0 ) {
-					angle += 360;
-				}
-				return angle;
-			}
-
-			$(function() {
-				var angle = 0;
-				var spriteX = 450;
-				var spriteY = 250;
-				var SPEED_MAX = 8;
-				var speed = 0;
-				var mouseX = 0;
-				var mouseY = 0;
-				$('#wrapper').mousemove(function(e) {
-					var parentOffset = $(this).offset(); 
-					mouseX = parseInt(e.pageX - parentOffset.left);
-					mouseY = parseInt(e.pageY - parentOffset.top);
-					
-					angle = getAngle(parseInt(spriteX),parseInt(spriteY),mouseX,mouseY);
-					$('#target').rotate(angle*-1);
-
-					speed = parseInt(Math.round( ( Math.round(Math.abs(mouseX - spriteX)) + Math.round(Math.abs(mouseY - spriteY)) ) / 25)/2);
-					if( speed > SPEED_MAX ) {
-						speed = SPEED_MAX;
-					} else if( speed <= 0 ) {
-						speed = 0;
-					}
-				});
-				
-				$(document).keydown(function(event){
-					if( event.keyCode == 87 ) { // w
-						var theta = angle * Math.PI / 180
-						var dX = Math.round(speed * Math.cos(theta));
-						var dY = Math.round(speed * Math.sin(theta));
-						spriteX += dX;
-						spriteY -= dY;
-						speed = Math.round( ( Math.round(Math.abs(mouseX - spriteX)) + Math.round(Math.abs(mouseY - spriteY)) ) / 50);
-						if( speed > SPEED_MAX ) {
-							speed = SPEED_MAX;
-						}
-						$('#target').css({
-							'top': parseInt(spriteY-16)+'px',
-							'left': parseInt(spriteX-16)+'px'
-						});
-					}
-				});
-			});
-
-		</script>
-
+		<script src="/socket.io/socket.io.js"></script>
+    	<script type="text/javascript" src="/js/world-engine.js"></script>
+    	<script type="text/javascript">
+    		var engine = new WorldEngine({});
+    		engine.run();
+    	</script>
 		<style>
-			body {
-				overflow: hidden;
-				margin: 0;
-				padding: 0;
-				background: #414141;
-			}
-			#wrapper {
+			html, body {
+				width: 100%;
 				height: 100%;
-				margin: 0;
-				padding: 0;
-				position: relative;
-			}
-			#target {
-				width: 32px;
-				position: absolute;
-				top: 234px;
-				left: 434px;
+				margin: 0px;
+				padding: 0px;
+				background: #414141;
 			}
 		</style>
 	</body>
