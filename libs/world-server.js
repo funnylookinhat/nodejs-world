@@ -19,7 +19,7 @@ exports = module.exports = function(params) {
 
 	// Temporary - we should move this into a config file.
 	var _baseDirectory = params.baseDirectory;
-	var _imageMagick = require('imagemagick');
+	//var _imageMagick = require('imagemagick');
 
 	var _world = {
 		width: 10000,
