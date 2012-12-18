@@ -15,3 +15,23 @@ exports.sendCharacterData = (function (params) {
 		character: params.character
 	});
 });
+
+exports.sendEntityList = (function (params) {
+	params.socket.emit('serverEntityList',{
+		entities: params.entities
+	});
+});
+
+exports.sendEntityUpdate = (function (params) {
+	params.socket.emit('serverEntityUpdate',{
+		entity_id: params.entity_id,
+		entity: params.entity
+	});
+});
+
+exports.sendEntityAdd = (function (params) {
+	params.socket.emit('serverEntityAdd',{
+		entity_id: params.entity_id,
+		entity: params.entity
+	});
+});

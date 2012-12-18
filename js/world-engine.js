@@ -75,7 +75,24 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	_updateCharacterMovement = function() {
-		// GO !
+		var dX = 0;
+		var dY = 0;
+		for( i in _pressedKeysValues ) {
+			if( _pressedKeysValues[i] != null ) {
+				dX += _pressedKeysValues[i][0];
+				dY += _pressedKeysValues[i][1];
+			}
+		}
+		console.log(dX+' : '+dY);
+		if( dX != 0 ||
+			dY != 0 ) {
+			_character.speed = 10;
+			_character.angle = getAngle(0,0,dX,dY);
+		} else {
+			_character.speed = 0;
+		}
+		console.log(_character);
+		_sendMovementUpdate();
 	}
 
 	// We should figure out a way to put these in an external file ( callbacks maybe ? )
@@ -106,6 +123,14 @@ var WorldEngine = (function(constructParams) {
 				_world = data.world;
 			}
 
+			_sendRequestEntities();
+
+		});
+
+		_socket.on('serverEntityList', function (data) {
+			if( data.entities != undefined ) {
+				_entities = data.entities;
+			}
 		});
 
 		_socket.on('serverCharacterData', function (data) {
@@ -114,12 +139,66 @@ var WorldEngine = (function(constructParams) {
 			}
 		});
 
+		_socket.on('serverEntityUpdate', function (data) {
+			if( data.entity_id != undefined &&
+				_entities[data.entity_id] != undefined ) {
+				if( data.entity.x != undefined ) {
+					_entities[data.entity_id].x = data.entity.x;
+				}
+				if( data.entity.y != undefined ) {
+					_entities[data.entity_id].y = data.entity.y;
+				}
+				if( data.entity.angle != undefined ) {
+					_entities[data.entity_id].angle = data.entity.angle;
+				}
+				if( data.entity.speed != undefined ) {
+					_entities[data.entity_id].speed = data.entity.speed;
+				}
+				if( data.entity.name != undefined ) {
+					_entities[data.entity_id].name = data.entity.name;
+				}
+				if( data.entity.avatar != undefined ) {
+					_entities[data.entity_id].avatar = data.entity.avatar;
+				}
+			} else if ( data.entity_id != undefined &&
+						data.entity != undefined ) {
+				// We'll add it just in case, but it really shouldn't be here?
+				_entities[data.entity_id] = data.entity;
+			}
+		});
+
+		_socket.on('serverEntityAdd', function (data) {
+			if( data.entity_id != undefined &&
+				data.entity != undefined ) {
+				_entities[data.entity_id] = data.entity;
+			}
+		});
+
+	}
+
+	_sendRequestEntities = function() {
+		_socket.emit('clientRequestEntities');
 	}
 
 	_sendCharacterLogin = function(name,avatar) {
 		_socket.emit('clientCharacterLogin',{
 			name: name
 		});
+	}
+
+	_sendMovementUpdate = function() {
+		_socket.emit('clientMovementUpdate',{
+			angle: _character.angle,
+			speed: _character.speed,
+			x: _character.x,
+			y: _character.y
+		});
+	}
+
+	_showLoginScreen = function() {
+		// This should be WAY nicer and include avatar selection.
+		var name = prompt("Please enter your name.","Nobody");
+		_sendCharacterLogin(name);
 	}
 
 	__construct = function() {
@@ -145,10 +224,14 @@ var WorldEngine = (function(constructParams) {
 
 		_bindSocketEvents();
 
-		var characterName = constructParams.name != undefined ? constructParams.name : 'Nobody';
+		setTimeout((function() {
+			_showLoginScreen();
+		}),1000);
+
+		// var characterName = constructParams.name != undefined ? constructParams.name : 'Nobody';
 
 		// Send Character Info
-		_sendCharacterLogin();
+		// _sendCharacterLogin();
 
 	}()
 
@@ -201,45 +284,53 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	_drawEntities = function(frameBox,frame) {
-
+		if( _entities != undefined ) {
+			for( i in _entities ) {
+				_drawEntity(_entities[i],frameBox,frame);
+			}
+		}
 	};
 
 	_drawCharacter = function(frameBox,frame) {
 		if( _character != undefined ) {
-			var xpos,ypos; // Sprite animation positioning.
-			if( _character.angle >= 315 || _character.angle < 45 ) {
-				ypos = 2;
-			} else if ( _character.angle >= 45 && _character.angle < 135 ) {
-				ypos = 3;
-			} else if ( _character.angle >= 135 && _character.angle < 225 ) {
-				ypos = 1;
-			} else if ( _character.angle >= 225 && _character.angle < 315 ) {
-				ypos = 0;
-			} else {
-				ypos = 0; // ??!
-			}
-
-			ypos = ypos * ( _avatars[_character.avatar].height / _AVATAR_SPRITE_FRAMES_Y );
-			
-			xpos = 
-				( _avatars[_character.avatar].width / _AVATAR_SPRITE_FRAMES_X ) * 
-				( Math.floor( frame * _AVATAR_SPRITE_FRAMES_X / _FPS ) > 3 ? 3 : Math.floor( frame * _AVATAR_SPRITE_FRAMES_X / _FPS ) );
-			if( _character.speed == 0 ) {
-				xpos = 0;
-			}
-
-			_context.drawImage(
-				_avatars[_character.avatar], 
-				xpos,
-				ypos,
-				( _avatars[_character.avatar].width / _AVATAR_SPRITE_FRAMES_X ), 
-				( _avatars[_character.avatar].height / _AVATAR_SPRITE_FRAMES_Y ), 
-				inBoxCoordinateX(_character,frameBox), //character.x,//Math.floor( Math.floor(context.canvas.width / 2) - ( character.image.width / numFrames / 2 ) ), 
-				inBoxCoordinateY(_character,frameBox), //character.y,//Math.floor( Math.floor(context.canvas.height / 2) - ( character.image.height / numFrames / 2 ) ), 
-				( _avatars[_character.avatar].width / _AVATAR_SPRITE_FRAMES_X ), 
-				( _avatars[_character.avatar].height / _AVATAR_SPRITE_FRAMES_Y ));
+			_drawEntity(_character,frameBox,frame);
 		}
 	};
+
+	_drawEntity = function(entity,frameBox,frame) {
+		var xpos,ypos; // Sprite animation positioning.
+		if( entity.angle >= 315 || entity.angle < 45 ) {
+			ypos = 2;
+		} else if ( entity.angle >= 45 && entity.angle < 135 ) {
+			ypos = 3;
+		} else if ( entity.angle >= 135 && entity.angle < 225 ) {
+			ypos = 1;
+		} else if ( entity.angle >= 225 && entity.angle < 315 ) {
+			ypos = 0;
+		} else {
+			ypos = 0; // ??!
+		}
+
+		ypos = ypos * ( _avatars[entity.avatar].height / _AVATAR_SPRITE_FRAMES_Y );
+		
+		xpos = 
+			( _avatars[entity.avatar].width / _AVATAR_SPRITE_FRAMES_X ) * 
+			( Math.floor( frame * _AVATAR_SPRITE_FRAMES_X / _FPS ) > 3 ? 3 : Math.floor( frame * _AVATAR_SPRITE_FRAMES_X / _FPS ) );
+		if( entity.speed == 0 ) {
+			xpos = 0;
+		}
+
+		_context.drawImage(
+			_avatars[entity.avatar], 
+			xpos,
+			ypos,
+			( _avatars[entity.avatar].width / _AVATAR_SPRITE_FRAMES_X ), 
+			( _avatars[entity.avatar].height / _AVATAR_SPRITE_FRAMES_Y ), 
+			inBoxCoordinateX(entity,frameBox), //character.x,//Math.floor( Math.floor(context.canvas.width / 2) - ( character.image.width / numFrames / 2 ) ), 
+			inBoxCoordinateY(entity,frameBox), //character.y,//Math.floor( Math.floor(context.canvas.height / 2) - ( character.image.height / numFrames / 2 ) ), 
+			( _avatars[entity.avatar].width / _AVATAR_SPRITE_FRAMES_X ), 
+			( _avatars[entity.avatar].height / _AVATAR_SPRITE_FRAMES_Y ));
+	}
 
 	_drawSceneBackground = function(frameBox,frame) {
 		if( _world.ground.image != undefined && 
@@ -301,6 +392,33 @@ var WorldEngine = (function(constructParams) {
 		}
 	}
 
+	_updateEntities = function() {
+		if( _character != undefined ) {
+			_character = _updateEntity(_character);
+		}
+		if( _entities != undefined ) {
+			for( i in _entities ) {
+				_entities[i] = _updateEntity(_entities[i]);
+			}
+		}
+	}
+
+	_updateEntity = function(entity) {
+		entity.x += Math.round(getDx(entity.angle,entity.speed));
+		entity.y -= Math.round(getDy(entity.angle,entity.speed));
+		if( entity.x <= 20 ) {
+			entity.x = 20;
+		} else if ( entity.x >= ( _world.width - 20 ) ) {
+			entity.x = ( _world.width - 20 );
+		}
+		if( entity.y <= 20 ) {
+			entity.y = 20;
+		} else if ( entity.y >= ( _world.height - 20 ) ) {
+			entity.y = ( _world.height - 20 );
+		}
+		return entity;
+	}
+
 	// There has got to be a better way to store these and call them...
 	function inBox(item,box) {
 		if( item.x >= (box.xmin - Math.floor( item.width / 2 ) )  &&
@@ -351,6 +469,7 @@ var WorldEngine = (function(constructParams) {
 		_FPS = 30;
 		setInterval( (function() {
 			_drawFrame( ( _frame < _FPS ? ++_frame : _frame = 0 ) );
+			_updateEntities();
 		}), 1000 / _FPS );
 	}
 	

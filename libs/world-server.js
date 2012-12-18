@@ -75,7 +75,13 @@ exports = module.exports = function(params) {
 			images: _images,
 			avatars: _avatars,
 			world: _world
-			// Entities ?
+		});
+
+		socket.on('clientRequestEntities', function (data) {
+			worldEvents.sendEntityList({
+				socket: socket,
+				entities: _entities,
+			});
 		});
 
 		socket.on('clientCharacterLogin', function (data) {
@@ -84,9 +90,24 @@ exports = module.exports = function(params) {
 			var dataX = data.x != undefined ? data.x : Math.round( _world.width / 2 );
 			var dataY = data.y != undefined ? data.y : Math.round( _world.height / 2 );
 			var dataAvatar = data.avatar != undefined ? data.avatar : null;
+			
+			/*
 			if( _avatars[dataAvatar] == undefined ) {
 				dataAvatar = _default_avatar;
 			}
+			*/
+			// Random Avatar Temp Code
+			var r = Math.round(Math.random() * 50);
+			var s = 0;
+			for( i in _avatars ) {
+				console.log(s+' =?= '+r);
+				if( s == r ) {
+					console.log('SET TO '+i);
+					dataAvatar = i;
+				}
+				s++;
+			} 
+
 			var dataWidth = 50;
 			var dataHeight = 50;
 
@@ -114,7 +135,33 @@ exports = module.exports = function(params) {
 						socket: socket,
 						character: _entities[socket.id]
 					});
+
+					worldEvents.sendEntityAdd({
+						socket: socket.broadcast,
+						entity_id: socket.id,
+						entity: _entities[socket.id]
+					});	
 				}
+			});
+		});
+		
+		socket.on('clientMovementUpdate', function (data) {
+			if( data.angle != undefined ) {
+				_entities[socket.id].angle = data.angle;
+			}
+			if( data.speed != undefined ) {
+				_entities[socket.id].speed = data.speed;
+			}
+			if( data.x != undefined ) {
+				_entities[socket.id].x = data.x;
+			}
+			if( data.y != undefined ) {
+				_entities[socket.id].y = data.y;
+			}
+			worldEvents.sendEntityUpdate({
+				socket: socket.broadcast,
+				entity_id: socket.id,
+				entity: _entities[socket.id]
 			});
 		});
 
