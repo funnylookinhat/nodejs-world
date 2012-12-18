@@ -100,17 +100,36 @@ exports = module.exports = function(params) {
 			var r = Math.round(Math.random() * 50);
 			var s = 0;
 			for( i in _avatars ) {
-				console.log(s+' =?= '+r);
 				if( s == r ) {
-					console.log('SET TO '+i);
 					dataAvatar = i;
 				}
 				s++;
 			} 
 
-			var dataWidth = 50;
-			var dataHeight = 50;
+			var dataWidth = 32;
+			var dataHeight = 48;
 
+			_entities[socket.id] = worldClasses.Entity({
+				name: dataName,
+				x: dataX,
+				y: dataY, 
+				avatar: dataAvatar,
+				width: dataWidth,
+				height: dataHeight,
+			});
+
+			worldEvents.sendCharacterData({
+				socket: socket,
+				character: _entities[socket.id]
+			});
+
+			worldEvents.sendEntityAdd({
+				socket: socket.broadcast,
+				entity_id: socket.id,
+				entity: _entities[socket.id]
+			});	
+
+			/*
 			_imageMagick.identify(_baseDirectory+'/'+_avatars[dataAvatar], function(err, imageData) {
 				if( err ) {
 					// ???
@@ -143,6 +162,7 @@ exports = module.exports = function(params) {
 					});	
 				}
 			});
+*/
 		});
 		
 		socket.on('clientMovementUpdate', function (data) {
