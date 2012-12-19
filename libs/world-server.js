@@ -19,8 +19,7 @@ exports = module.exports = function(params) {
 
 	// Temporary - we should move this into a config file.
 	var _baseDirectory = params.baseDirectory;
-	//var _imageMagick = require('imagemagick');
-
+	
 	var _world = {
 		width: 10000,
 		height: 10000,
@@ -78,10 +77,12 @@ exports = module.exports = function(params) {
 		});
 
 		socket.on('clientRequestEntities', function (data) {
+			/*
 			worldEvents.sendEntityList({
 				socket: socket,
-				entities: _entities,
+				entities: _entities
 			});
+			*/
 		});
 
 		socket.on('clientCharacterLogin', function (data) {
@@ -106,6 +107,7 @@ exports = module.exports = function(params) {
 				s++;
 			} 
 
+			// These should be loaded from a config file.
 			var dataWidth = 32;
 			var dataHeight = 48;
 
@@ -129,40 +131,6 @@ exports = module.exports = function(params) {
 				entity: _entities[socket.id]
 			});	
 
-			/*
-			_imageMagick.identify(_baseDirectory+'/'+_avatars[dataAvatar], function(err, imageData) {
-				if( err ) {
-					// ???
-					// TODO - ERROR.
-					console.log("ERROR ON IMAGE DATA");
-					console.log(err);
-					process.exit(1);
-				} else {
-					dataWidth = Math.round( imageData.width / _AVATAR_SPRITE_FRAME_X );
-					dataHeight = Math.round( imageData.height / _AVATAR_SPRITE_FRAME_Y );
-					// Initialize a new entity.
-					_entities[socket.id] = worldClasses.Entity({
-						name: dataName,
-						x: dataX,
-						y: dataY, 
-						avatar: dataAvatar,
-						width: dataWidth,
-						height: dataHeight,
-					});
-
-					worldEvents.sendCharacterData({
-						socket: socket,
-						character: _entities[socket.id]
-					});
-
-					worldEvents.sendEntityAdd({
-						socket: socket.broadcast,
-						entity_id: socket.id,
-						entity: _entities[socket.id]
-					});	
-				}
-			});
-*/
 		});
 		
 		socket.on('clientMovementUpdate', function (data) {

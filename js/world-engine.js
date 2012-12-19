@@ -128,7 +128,6 @@ var WorldEngine = (function(constructParams) {
 		});
 
 		_socket.on('serverEntityList', function (data) {
-			console.log(data);
 			if( data.entities != undefined ) {
 				_entities = data.entities;
 			}
@@ -137,7 +136,6 @@ var WorldEngine = (function(constructParams) {
 		_socket.on('serverCharacterData', function (data) {
 			if( data.character != undefined ) {
 				_character = data.character;
-				console.log(_character);
 			}
 		});
 
@@ -222,7 +220,7 @@ var WorldEngine = (function(constructParams) {
 			_keyUp((typeof e.which != "undefined" ? e.which : e.keyCode));
 		});
 		
-		_socket = io.connect('http://localhost');
+		_socket = io.connect();
 
 		_bindSocketEvents();
 
