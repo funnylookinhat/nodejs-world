@@ -83,7 +83,6 @@ var WorldEngine = (function(constructParams) {
 				dY += _pressedKeysValues[i][1];
 			}
 		}
-		console.log(dX+' : '+dY);
 		if( dX != 0 ||
 			dY != 0 ) {
 			_character.speed = 10;
@@ -91,7 +90,6 @@ var WorldEngine = (function(constructParams) {
 		} else {
 			_character.speed = 0;
 		}
-		console.log(_character);
 		_sendMovementUpdate();
 	}
 
@@ -130,6 +128,8 @@ var WorldEngine = (function(constructParams) {
 		_socket.on('serverEntityList', function (data) {
 			if( data.entities != undefined ) {
 				_entities = data.entities;
+			} else {
+				_entities = [];
 			}
 		});
 
@@ -464,14 +464,54 @@ var WorldEngine = (function(constructParams) {
 		return Math.round(10 * speed * Math.sin(theta)) / 10;
 	}
 
+	_mainLoop = function() {
+		_drawFrame( ( _frame < _FPS ? ++_frame : _frame = 0 ) );
+		_updateEntities();
+	}
+
 	this.run = function() {
 		_frame = -1;
 		_FPS = 30;
+		/*
 		setInterval( (function() {
-			_drawFrame( ( _frame < _FPS ? ++_frame : _frame = 0 ) );
-			_updateEntities();
+			_mainLoop();
 		}), 1000 / _FPS );
+		*/
+		var animFrame = window.requestAnimationFrame ||
+	            window.webkitRequestAnimationFrame ||
+	            window.mozRequestAnimationFrame    ||
+	            window.oRequestAnimationFrame      ||
+	            window.msRequestAnimationFrame     ||
+	            null ;
+
+	    if ( animFrame !== null ) {
+	        
+	        if ( $.browser.mozilla ) {
+	            var _recursiveAnim = function() {
+	                _mainLoop();
+	                animFrame();
+	            };
+
+	            // setup for multiple calls
+	            window.addEventListener("MozBeforePaint", _recursiveAnim, false);
+
+	            // start the mainloop
+	            animFrame();
+	        } else {
+	            var _recursiveAnim = function() {
+	                _mainLoop();
+	                animFrame( _recursiveAnim, _canvas );
+	            };
+
+	            // start the mainloop
+	            animFrame( _recursiveAnim, _canvas );
+	        }
+	    } else {
+	        var ONE_FRAME_TIME = 1000.0 / _FPS ;
+	        setInterval( _mainLoop, ONE_FRAME_TIME );
+	    }
 	}
+
 	
 
 });

@@ -76,6 +76,11 @@ exports = module.exports = function(params) {
 			world: _world
 		});
 
+		worldEvents.sendEntityList({
+			socket: socket,
+			entities: _entities
+		});
+
 		socket.on('clientRequestEntities', function (data) {
 			/*
 			worldEvents.sendEntityList({
