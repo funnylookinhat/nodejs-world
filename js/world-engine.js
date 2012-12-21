@@ -474,19 +474,21 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	// Thanks Paul Irish.
-	window.requestAnimFrame = (function(){
-		return
-			window.requestAnimationFrame       || 
-			window.webkitRequestAnimationFrame || 
-			window.mozRequestAnimationFrame    || 
-			window.oRequestAnimationFrame      || 
-			window.msRequestAnimationFrame     || 
-			function( callback ){
-				window.setTimeout(callback, 1000 / 60);
-			};
-	})();
+	
 
 	this.run = function() {
+		window.requestAnimFrame = (function(){
+			return
+				window.requestAnimationFrame       || 
+				window.webkitRequestAnimationFrame || 
+				window.mozRequestAnimationFrame    || 
+				window.oRequestAnimationFrame      || 
+				window.msRequestAnimationFrame     || 
+				function( callback ){
+					window.setTimeout(callback, 1000 / 60);
+				};
+		})();
+
 		_frame = -1;
 		_FPS = 60;
 		_lastTime = Date.now();
