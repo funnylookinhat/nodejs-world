@@ -19,7 +19,8 @@ var WorldEngine = (function(constructParams) {
 		_SCREEN_WIDTH,
 		_SCREEN_HEIGHT,
 		_frame,
-		_FPS;
+		_FPS,
+		_lastTime;
 
 	var _AVATAR_SPRITE_FRAMES_X = 4,	// Animation is in 4 frames. - From server?
 		_AVATAR_SPRITE_FRAMES_Y = 4;	// Quad-Directional - From server?
@@ -85,7 +86,7 @@ var WorldEngine = (function(constructParams) {
 		}
 		if( dX != 0 ||
 			dY != 0 ) {
-			_character.speed = 10;
+			_character.speed = 4;
 			_character.angle = getAngle(0,0,dX,dY);
 		} else {
 			_character.speed = 0;
@@ -392,20 +393,23 @@ var WorldEngine = (function(constructParams) {
 		}
 	}
 
+	// Should eventually be renamed to updateFrame or something
 	_updateEntities = function() {
+		var timeDelta = Date.now() - _lastTime;
 		if( _character != undefined ) {
-			_character = _updateEntity(_character);
+			_character = _updateEntity(_character,timeDelta);
 		}
 		if( _entities != undefined ) {
 			for( i in _entities ) {
-				_entities[i] = _updateEntity(_entities[i]);
+				_entities[i] = _updateEntity(_entities[i],timeDelta);
 			}
 		}
+		_lastTime = Date.now();
 	}
 
-	_updateEntity = function(entity) {
-		entity.x += Math.round(getDx(entity.angle,entity.speed));
-		entity.y -= Math.round(getDy(entity.angle,entity.speed));
+	_updateEntity = function(entity,timeDelta) {
+		entity.x += Math.round(getDx(entity.angle,entity.speed) * ( timeDelta * _FPS / 1000 ));
+		entity.y -= Math.round(getDy(entity.angle,entity.speed) * ( timeDelta * _FPS / 1000 ));
 		if( entity.x <= 20 ) {
 			entity.x = 20;
 		} else if ( entity.x >= ( _world.width - 20 ) ) {
@@ -469,49 +473,33 @@ var WorldEngine = (function(constructParams) {
 		_updateEntities();
 	}
 
+	// Thanks Paul Irish.
+	window.requestAnimFrame = (function(){
+		return
+			window.requestAnimationFrame       || 
+			window.webkitRequestAnimationFrame || 
+			window.mozRequestAnimationFrame    || 
+			window.oRequestAnimationFrame      || 
+			window.msRequestAnimationFrame     || 
+			function( callback ){
+				window.setTimeout(callback, 1000 / 60);
+			};
+	})();
+
 	this.run = function() {
 		_frame = -1;
-		_FPS = 30;
+		_FPS = 60;
+		_lastTime = Date.now();
+		
 		/*
 		setInterval( (function() {
 			_mainLoop();
 		}), 1000 / _FPS );
 		*/
-		var animFrame = window.requestAnimationFrame ||
-	            window.webkitRequestAnimationFrame ||
-	            window.mozRequestAnimationFrame    ||
-	            window.oRequestAnimationFrame      ||
-	            window.msRequestAnimationFrame     ||
-	            null ;
-
-	    if ( animFrame !== null ) {
-	        
-	        if ( $.browser.mozilla ) {
-	            var _recursiveAnim = function() {
-	                _mainLoop();
-	                animFrame();
-	            };
-
-	            // setup for multiple calls
-	            window.addEventListener("MozBeforePaint", _recursiveAnim, false);
-
-	            // start the mainloop
-	            animFrame();
-	        } else {
-	            var _recursiveAnim = function() {
-	                _mainLoop();
-	                animFrame( _recursiveAnim, _canvas );
-	            };
-
-	            // start the mainloop
-	            animFrame( _recursiveAnim, _canvas );
-	        }
-	    } else {
-	        var ONE_FRAME_TIME = 1000.0 / _FPS ;
-	        setInterval( _mainLoop, ONE_FRAME_TIME );
-	    }
+		(function animloop(){
+			requestAnimFrame(animloop);
+			_mainLoop();
+		})();
 	}
-
-	
 
 });
