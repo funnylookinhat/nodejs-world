@@ -474,17 +474,16 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	// Thanks Paul Irish.
-	_requestAnimFrame = function(){
-		return
-			window.requestAnimationFrame       || 
-			window.webkitRequestAnimationFrame || 
-			window.mozRequestAnimationFrame    || 
-			window.oRequestAnimationFrame      || 
-			window.msRequestAnimationFrame     || 
-			function( callback ){
-				window.setTimeout(callback, 1000 / 60);
-			};
-	};
+	window.requestAnimFrame = (function(){
+      return  window.requestAnimationFrame       || 
+              window.webkitRequestAnimationFrame || 
+              window.mozRequestAnimationFrame    || 
+              window.oRequestAnimationFrame      || 
+              window.msRequestAnimationFrame     || 
+              function( callback ){
+                window.setTimeout(callback, 1000 / 60);
+              };
+    })();
 
 	this.run = function() {
 		_frame = -1;
@@ -497,7 +496,7 @@ var WorldEngine = (function(constructParams) {
 		}), 1000 / _FPS );
 		*/
 		(function animloop(){
-			_requestAnimFrame(animloop);
+			requestAnimFrame(animloop);
 			_mainLoop();
 		})();
 	}
