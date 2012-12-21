@@ -128,9 +128,9 @@ var WorldEngine = (function(constructParams) {
 
 		_socket.on('serverEntityList', function (data) {
 			if( data.entities != undefined ) {
-				_entities = data.entities;
-			} else {
-				_entities = [];
+				for( i in data.entities ) {
+					_entities[i] = data.entities[i];
+				}
 			}
 		});
 
@@ -220,6 +220,8 @@ var WorldEngine = (function(constructParams) {
 		$(document).keyup(function (e) {
 			_keyUp((typeof e.which != "undefined" ? e.which : e.keyCode));
 		});
+
+		_entities = {};
 		
 		_socket = io.connect();
 
@@ -241,10 +243,10 @@ var WorldEngine = (function(constructParams) {
 			return;
 		}
 		
-		var frameXMin = 0;
-		var frameXMax = _SCREEN_WIDTH;
-		var frameYMin = 0;
-		var frameYMax = _SCREEN_HEIGHT;
+		var frameXMin = _world.entry.x - Math.round( _SCREEN_WIDTH / 2 );
+		var frameXMax = frameXMin + _SCREEN_WIDTH;
+		var frameYMin = _world.entry.y - Math.round( _SCREEN_HEIGHT / 2 );
+		var frameYMax = frameYMin + _SCREEN_HEIGHT;
 		if( _character != undefined ) {
 			frameXMin = _character.x - Math.floor( _SCREEN_WIDTH / 2 );
 			if( frameXMin < 0 ) {

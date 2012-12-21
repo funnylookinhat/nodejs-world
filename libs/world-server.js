@@ -10,7 +10,7 @@ var worldEvents = require('./world-events');
 exports = module.exports = function(params) {
 	
 	var _socket = params.socket != undefined ? params.socket : null;
-	var _entities = [];
+	var _entities = {};
 	var _images = params.images;
 	var _avatars = params.avatars;
 	var _default_avatar = params.default_avatar;
@@ -23,6 +23,10 @@ exports = module.exports = function(params) {
 	var _world = {
 		width: 10000,
 		height: 10000,
+		entry: {
+			x: 5000,
+			y: 5000
+		},
 		pieces: [],
 		ground: {
 			color: '#448844',
@@ -93,8 +97,8 @@ exports = module.exports = function(params) {
 		socket.on('clientCharacterLogin', function (data) {
 			// TODO - Validate avatar information and whatnot.
 			var dataName = data.name != undefined ? data.name : "Nobody";
-			var dataX = data.x != undefined ? data.x : Math.round( _world.width / 2 );
-			var dataY = data.y != undefined ? data.y : Math.round( _world.height / 2 );
+			var dataX = data.x != undefined ? data.x : Math.round( _world.entry.x );
+			var dataY = data.y != undefined ? data.y : Math.round( _world.entry.y );
 			var dataAvatar = data.avatar != undefined ? data.avatar : null;
 			
 			/*
@@ -139,6 +143,10 @@ exports = module.exports = function(params) {
 		});
 		
 		socket.on('clientMovementUpdate', function (data) {
+			if( _entities[socket.id] == undefined ) {
+				// TODO - Send Error
+				return;
+			}
 			if( data.angle != undefined ) {
 				_entities[socket.id].angle = data.angle;
 			}
