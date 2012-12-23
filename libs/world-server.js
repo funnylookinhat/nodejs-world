@@ -33,7 +33,7 @@ exports = module.exports = function(params) {
 			image: 'grass',
 		}
 	};
-
+	
 	// Generate Random World.
 	for( var i = 0; i < 5000; i++ ) {
 		image = 'flower1';
@@ -164,6 +164,16 @@ exports = module.exports = function(params) {
 				entity_id: socket.id,
 				entity: _entities[socket.id]
 			});
+		});
+
+		socket.on('clientSendMessage', function (data) {
+			if( _entities[socket.id] == undefined ) {
+				// TODO - Send Error
+				return;
+			}
+			if( data.text != undefined ) {
+				// Send Message
+			}
 		});
 
 	});

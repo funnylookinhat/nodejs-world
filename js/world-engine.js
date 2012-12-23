@@ -13,6 +13,9 @@ var WorldEngine = (function(constructParams) {
 		_messages,
 		_world,
 		_worldGroundPattern,
+		_worldGroundCanvas,
+		/* _backgroundCanvas, */	// Used for drawing the entire background out then copying in.
+									// More memory ( 5x ) for a minor drop in CPU.
 		_socket,
 		_canvas,
 		_context,
@@ -27,19 +30,15 @@ var WorldEngine = (function(constructParams) {
 
 	// KeyCode vectors for movement
 	// We've got them both - but for now we'll just enable WASD
-	var _arrowKeys = [37,38,39,40];
-	var _wasdKeys = [87,65,83,68];
-	var _arrowKeysValues = [];
-	_arrowKeysValues[37] = [-1,0];
-	_arrowKeysValues[38] = [0,-1];
-	_arrowKeysValues[39] = [1,0];
-	_arrowKeysValues[40] = [0,1];
-
-	var _wasdKeysValues = []
-	_wasdKeysValues[65] = [-1,0];
-	_wasdKeysValues[87] = [0,-1];
-	_wasdKeysValues[68] = [1,0];
-	_wasdKeysValues[83] = [0,1];
+	var _movementKeys = [];
+	_movementKeys[37] = [-1,0];
+	_movementKeys[38] = [0,-1];
+	_movementKeys[39] = [1,0];
+	_movementKeys[40] = [0,1];
+	_movementKeys[65] = [-1,0];
+	_movementKeys[87] = [0,-1];
+	_movementKeys[68] = [1,0];
+	_movementKeys[83] = [0,1];
 
 	var _pressedKeysValues = [];
 	_pressedKeysValues[37] = null;
@@ -60,15 +59,15 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	_keyDown = function(keyCode) {
-		if( _wasdKeys.indexOf(keyCode) != -1 &&
+		if( _movementKeys[keyCode] != undefined &&
 			_pressedKeysValues[keyCode] == null ) {
-			_pressedKeysValues[keyCode] = _wasdKeysValues[keyCode];
+			_pressedKeysValues[keyCode] = _movementKeys[keyCode];
 			_updateCharacterMovement();
 		}
 	}
 
 	_keyUp = function(keyCode) {
-		if( _wasdKeys.indexOf(keyCode) != -1 &&
+		if( _movementKeys[keyCode] != undefined &&
 			_pressedKeysValues[keyCode] != null ) {
 			_pressedKeysValues[keyCode] = null;
 			_updateCharacterMovement();
@@ -336,31 +335,75 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	_drawSceneBackground = function(frameBox,frame) {
+		if( _world == undefined ) {
+			return;
+		}
+		// More memory - tiny CPU improvement.
+		/*
+		if( _backgroundCanvas == undefined ) {
+			_backgroundCanvas = document.createElement('canvas');
+			_backgroundCanvas.width = _world.width;
+			_backgroundCanvas.height = _world.height;
+			if( _world.ground.image != undefined &&
+				_world.ground.image.length > 0 ) {
+				var backgroundPattern = _backgroundCanvas.getContext('2d').createPattern(_images[_world.ground.image],"repeat");
+				_backgroundCanvas.getContext('2d').fillStyle = backgroundPattern;
+				_backgroundCanvas.getContext('2d').fillRect(0,0,_backgroundCanvas.width,_backgroundCanvas.height);
+			} else {
+				_backgroundCanvas.getContext('2d').fillStyle = _world.ground.color;
+				_backgroundCanvas.getContext('2d').fillRect(0,0,_backgroundCanvas.width,_backgroundCanvas.height);
+			}
+			for( i in _world.pieces ) {
+				if( _world.pieces[i].solid == false ) {
+					_backgroundCanvas.getContext('2d').drawImage(
+						_images[_world.pieces[i].image],
+						Math.round( _world.pieces[i].x - ( _world.pieces[i].width / 2 ) ),
+						Math.round( _world.pieces[i].y - ( _world.pieces[i].height / 2 ) )
+					);
+				}
+			}
+		}
+
+		// Copy our canvas.
+		_context.drawImage(
+			_backgroundCanvas,
+			frameBox.xmin,
+			frameBox.ymin,
+			_SCREEN_WIDTH,
+			_SCREEN_HEIGHT,
+			0,
+			0,
+			_SCREEN_WIDTH,
+			_SCREEN_HEIGHT
+		);
+		return;
+		*/
 		if( _world.ground.image != undefined && 
 			_world.ground.image.length > 0 ) {
 			if( _worldGroundPattern == undefined ) {
 				_worldGroundPattern = _context.createPattern(_images[_world.ground.image],"repeat");
 			};
-			_context.translate(
-				( ( frameBox.xmin % _images[_world.ground.image].width ) * -1 ),
-				( ( frameBox.ymin % _images[_world.ground.image].height ) * -1 )
-			);
+			if( _worldGroundCanvas == undefined ) {
+				_worldGroundCanvas = document.createElement('canvas');
+			}
+			if( _worldGroundCanvas.width != ( _SCREEN_WIDTH + _images[_world.ground.image].width ) || 
+				_worldGroundCanvas.height != ( _SCREEN_HEIGHT + _images[_world.ground.image].height ) ) {
+				_worldGroundCanvas.width = ( _SCREEN_WIDTH + _images[_world.ground.image].width );
+				_worldGroundCanvas.height = ( _SCREEN_HEIGHT + _images[_world.ground.image].height );
+				_worldGroundCanvas.getContext('2d').fillStyle = _worldGroundPattern;
+				_worldGroundCanvas.getContext('2d').fillRect(0,0,_worldGroundCanvas.width,_worldGroundCanvas.height);
+			}
 			
-			_context.rect(
+			_context.drawImage(
+				_worldGroundCanvas,
+				( frameBox.xmin % _images[_world.ground.image].width ),
+				( frameBox.ymin % _images[_world.ground.image].height ),
+				_SCREEN_WIDTH,
+				_SCREEN_HEIGHT,
 				0,
 				0,
-				_SCREEN_WIDTH + ( _images[_world.ground.image].width ), 
-				_SCREEN_HEIGHT + ( _images[_world.ground.image].height )
-			);
-			
-			
-			_context.fillStyle = _worldGroundPattern;
-			_context.fill();
-			
-			_context.translate(
-				( ( frameBox.xmin % _images[_world.ground.image].width ) * 1 ),
-				( ( frameBox.ymin % _images[_world.ground.image].height ) * 1 )
-			);
+				_SCREEN_WIDTH,
+				_SCREEN_HEIGHT);
 			
 		} else {
 			// Solid Color
