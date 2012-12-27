@@ -85,37 +85,17 @@ exports = module.exports = function(params) {
 			entities: _entities
 		});
 
-		socket.on('clientRequestEntities', function (data) {
-			/*
-			worldEvents.sendEntityList({
-				socket: socket,
-				entities: _entities
-			});
-			*/
-		});
-
 		socket.on('clientCharacterLogin', function (data) {
 			// TODO - Validate avatar information and whatnot.
 			var dataName = data.name != undefined ? data.name : "Nobody";
 			var dataX = data.x != undefined ? data.x : Math.round( _world.entry.x );
 			var dataY = data.y != undefined ? data.y : Math.round( _world.entry.y );
 			var dataAvatar = data.avatar != undefined ? data.avatar : null;
-			
-			/*
-			if( _avatars[dataAvatar] == undefined ) {
+			if( dataAvatar == null ||
+				_avatars[dataAvatar] == undefined ) {
 				dataAvatar = _default_avatar;
 			}
-			*/
-			// Random Avatar Temp Code
-			var r = Math.round(Math.random() * 50);
-			var s = 0;
-			for( i in _avatars ) {
-				if( s == r ) {
-					dataAvatar = i;
-				}
-				s++;
-			} 
-
+			
 			// These should be loaded from a config file.
 			var dataWidth = 32;
 			var dataHeight = 48;
@@ -166,14 +146,32 @@ exports = module.exports = function(params) {
 			});
 		});
 
-		socket.on('clientSendMessage', function (data) {
+		socket.on('clientSendChatMessage', function (data) {
 			if( _entities[socket.id] == undefined ) {
 				// TODO - Send Error
 				return;
 			}
 			if( data.text != undefined ) {
-				// Send Message
+				worldEvents.sendChatMessage({
+					socket: socket,
+					text: data.text,
+					entity_id: socket.id
+				});
+
+				worldEvents.sendChatMessage({
+					socket: socket.broadcast,
+					text: data.text,
+					entity_id: socket.id
+				});
 			}
+		});
+
+		socket.on('disconnect', function () {
+			worldEvents.sendEntityRemove({
+				socket: socket.broadcast,
+				entity_id: socket.id
+			});
+			delete _entities[socket.id];
 		});
 
 	});

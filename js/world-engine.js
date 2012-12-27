@@ -14,6 +14,9 @@ var WorldEngine = (function(constructParams) {
 		_world,
 		_worldGroundPattern,
 		_worldGroundCanvas,
+		_imagesLoaded,
+		_imagesCount,
+		_imagesTotal,
 		/* _backgroundCanvas, */	// Used for drawing the entire background out then copying in.
 									// More memory ( 5x ) for a minor drop in CPU.
 		_socket,
@@ -49,6 +52,94 @@ var WorldEngine = (function(constructParams) {
 	_pressedKeysValues[87] = null;
 	_pressedKeysValues[68] = null;
 	_pressedKeysValues[83] = null;
+
+	/**
+	 * UI Stuff
+	 */
+	_pageLoadingShow = function(title, status, percent, description) {
+		if( title == undefined ||
+			title == false ) {
+			title = $('#loading-title').attr('rel');
+		}
+		if( status == undefined ||
+			status == false ) {
+			status = $('#loading-status').attr('rel');
+		}
+		if( percent == undefined ||
+			percent == false ) {
+			percent = $('#loading-progress').attr('rel');
+		}
+		if( description == undefined ||
+			description == false ) {
+			description = $('#loading-description').attr('rel');
+		}
+		$('#loading').show();
+		$('#overlay').show();
+		_pageLoadingUpdate(status,percent,description);
+	}
+
+	_pageLoadingHide = function() {
+		$('#loading').hide();
+		$('#overlay').hide();
+	}
+
+	_pageLoadingUpdate = function(status,percent,description) {
+		if( status != undefined &&
+			status != false ) {
+			$('#loading-status').text(status);
+		}
+		if( percent != undefined && 
+			percent != false ) {
+			$('#loading-progress .carrier').css('width',percent+'%');
+		}
+		if( description != undefined &&
+			description != false ) {
+			$('#loading-description').text(description);
+		}
+		
+	}
+
+	_pageLoginShow = function() {
+		for( i in _avatars ) {
+			$container = $('<span class="avatar"></span>');
+			$container.attr('rel',i);
+			$imgLink = $('<a href="#">&nbsp;</a>');
+			$imgLink.css('background-image', 'url('+_avatars[i].src +')');
+			$imgLink.width(_avatars[i].width / 4);
+			$imgLink.height(_avatars[i].height / 4);
+			$imgLink.css('margin-top',((100 - $imgLink.height())/2)+'px');
+			$container.html($imgLink);
+			$('#login .avatars').append($container);
+		}
+		$('#login').show();
+		$('#overlay').show();
+		$('#login .avatars .avatar a').click(function() {
+			$avatars = $(this).closest('.avatars');
+			$avatars.find('.avatar.selected').removeClass('selected');
+			$(this).closest('.avatar').addClass('selected');
+		});
+		$('#login-process').click(function() {
+			$avatar = $('#login .avatars .avatar.selected:first');
+			if( $avatar.length == 0 ) {
+				alert("Please choose an avatar.");
+				return;
+			}
+			$username = $('#login input[name="username"]');
+			if( $username.length == 0 ||
+				$username.val().length == 0 ) {
+				alert("Please enter a username.");
+				return;
+			}
+			_pageLoginHide();
+			_pageLoadingShow(false,"Logging in.",0,"Generating your character.");
+			_sendCharacterLogin($username.val(),$avatar.attr('rel'));
+		});
+	}
+
+	_pageLoginHide = function() {
+		$('#login').hide();
+		$('#overlay').hide();
+	}
 	
 	// Needs to be defined before __construct
 	_fitCanvas = function() {
@@ -59,7 +150,8 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	_keyDown = function(keyCode) {
-		if( _movementKeys[keyCode] != undefined &&
+		if( _character != undefined && 
+			_movementKeys[keyCode] != undefined &&
 			_pressedKeysValues[keyCode] == null ) {
 			_pressedKeysValues[keyCode] = _movementKeys[keyCode];
 			_updateCharacterMovement();
@@ -67,7 +159,8 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	_keyUp = function(keyCode) {
-		if( _movementKeys[keyCode] != undefined &&
+		if( _character != undefined && 
+			_movementKeys[keyCode] != undefined &&
 			_pressedKeysValues[keyCode] != null ) {
 			_pressedKeysValues[keyCode] = null;
 			_updateCharacterMovement();
@@ -93,27 +186,49 @@ var WorldEngine = (function(constructParams) {
 		_sendMovementUpdate();
 	}
 
+	_imageLoaded = function(filename) {
+		_imagesCount++;
+		_pageLoadingUpdate("Loading world.",(20 + Math.floor(50 * (_imagesCount / _imagesTotal))),"Resource loaded: "+filename);
+		if( _imagesCount == _imagesTotal ) {
+			_pageLoadingUpdate("Loading world.",75,"Drawing world.");
+			_imagesLoaded = true;
+			// Blank otherwise... onload firing too early?
+			setTimeout((function() {
+				_showLoginScreen();
+			}),1000);
+		}
+	}
+
 	// We should figure out a way to put these in an external file ( callbacks maybe ? )
 	_bindSocketEvents = function() {
 		
 		_socket.on('serverWorldData', function (data) {
+			_pageLoadingUpdate("Loading world.",20,"Initializing world data.");
+
 			// Init Images
 			if( data.images != undefined ) {
-				var images = {};
+				_imagesTotal += Object.keys(data.images).length;
+			}
+			if( data.avatars != undefined ) {
+				_imagesTotal += Object.keys(data.avatars).length;
+			}
+
+			if( data.images != undefined ) {
+				_images = {};
 				for( i in data.images ) {
-					images[i] = new Image();
-					images[i].src = data.images[i];
+					_images[i] = new Image();
+					_images[i].src = data.images[i];
+					_images[i].onload = _imageLoaded(i);
 				}
-				_images = images;
 			}
 
 			if( data.avatars != undefined ) {
-				var avatars = {};
+				_avatars = {};
 				for( i in data.avatars ) {
-					avatars[i] = new Image();
-					avatars[i].src = data.avatars[i];
+					_avatars[i] = new Image();
+					_avatars[i].src = data.avatars[i];
+					_avatars[i].onload = _imageLoaded(i);
 				}
-				_avatars = avatars;
 			}
 
 			// Copy World
@@ -134,6 +249,7 @@ var WorldEngine = (function(constructParams) {
 		});
 
 		_socket.on('serverCharacterData', function (data) {
+			_pageLoadingHide();
 			if( data.character != undefined ) {
 				_character = data.character;
 			}
@@ -174,6 +290,13 @@ var WorldEngine = (function(constructParams) {
 			}
 		});
 
+		_socket.on('serverEntityRemove', function (data) {
+			if( data.entity_id != undefined &&
+				_entities[data.entity_id] != undefined ) {
+				delete _entities[data.entity_id];
+			}
+		});
+
 	}
 
 	_sendRequestEntities = function() {
@@ -182,7 +305,8 @@ var WorldEngine = (function(constructParams) {
 
 	_sendCharacterLogin = function(name,avatar) {
 		_socket.emit('clientCharacterLogin',{
-			name: name
+			name: name,
+			avatar: avatar
 		});
 	}
 
@@ -195,13 +319,18 @@ var WorldEngine = (function(constructParams) {
 		});
 	}
 
+	_showLoadingScreen = function() {
+		_pageLoadingShow(false,"Connecting to server.",10,"Just hold on a second...");
+	}
+
 	_showLoginScreen = function() {
-		// This should be WAY nicer and include avatar selection.
-		var name = prompt("Please enter your name.","Nobody");
-		_sendCharacterLogin(name);
+		_pageLoadingHide();
+		_pageLoginShow();
 	}
 
 	__construct = function() {
+		_showLoadingScreen();
+
 		// Create our canvas.
 		_canvas = document.createElement('canvas');
 		_context = _canvas.getContext('2d');
@@ -220,25 +349,20 @@ var WorldEngine = (function(constructParams) {
 			_keyUp((typeof e.which != "undefined" ? e.which : e.keyCode));
 		});
 
+		_imagesLoaded = false;
+		_imagesTotal = 0;
+		_imagesCount = 0;
+
 		_entities = {};
 		
 		_socket = io.connect();
 
 		_bindSocketEvents();
-
-		setTimeout((function() {
-			_showLoginScreen();
-		}),1000);
-
-		// var characterName = constructParams.name != undefined ? constructParams.name : 'Nobody';
-
-		// Send Character Info
-		// _sendCharacterLogin();
-
 	}()
 
 	_drawFrame = function(frame) {
-		if ( _world == undefined ) {
+		if( _world == undefined ||
+			_imagesLoaded == false ) {
 			return;
 		}
 		
@@ -545,5 +669,7 @@ var WorldEngine = (function(constructParams) {
 			_mainLoop();
 		})();
 	}
+
+
 
 });

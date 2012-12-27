@@ -35,3 +35,16 @@ exports.sendEntityAdd = (function (params) {
 		entity: params.entity
 	});
 });
+
+exports.sendEntityRemove = (function (params) {
+	params.socket.emit('serverEntityRemove',{
+		entity_id: params.entity_id,
+	});
+});
+
+exports.sendChatMessage = (function (params) {
+	params.socket.emit('serverSendChatMessage',{
+		entity_id: params.entity_id,
+		text: params.text
+	});
+});
