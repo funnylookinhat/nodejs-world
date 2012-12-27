@@ -193,10 +193,10 @@ var WorldEngine = (function(constructParams) {
 		if( _imagesCount == _imagesTotal ) {
 			_pageLoadingUpdate("Loading world.",75,"Drawing world.");
 			_imagesLoaded = true;
-			// Blank otherwise... onload firing too early?
+			// Slow down just a bit to help the user...
 			setTimeout((function() {
 				_showLoginScreen();
-			}),500);
+			}),250);
 		}
 	}
 
