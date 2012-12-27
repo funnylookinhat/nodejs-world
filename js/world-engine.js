@@ -53,6 +53,7 @@ var WorldEngine = (function(constructParams) {
 	_pressedKeysValues[68] = null;
 	_pressedKeysValues[83] = null;
 
+
 	/**
 	 * UI Stuff
 	 */
@@ -186,16 +187,16 @@ var WorldEngine = (function(constructParams) {
 		_sendMovementUpdate();
 	}
 
-	_imageLoaded = function() {
+	_imageLoaded = function(filename) {
 		_imagesCount++;
-		_pageLoadingUpdate("Loading world.",(20 + Math.floor(50 * (_imagesCount / _imagesTotal))),"Resource loaded "+_imagesCount+" of "+_imagesTotal);
+		_pageLoadingUpdate("Loading world.",(20 + Math.floor(50 * (_imagesCount / _imagesTotal))),"Resource loaded "+filename+" ( "+_imagesCount+" of "+_imagesTotal+" ) ");
 		if( _imagesCount == _imagesTotal ) {
 			_pageLoadingUpdate("Loading world.",75,"Drawing world.");
 			_imagesLoaded = true;
 			// Blank otherwise... onload firing too early?
 			setTimeout((function() {
 				_showLoginScreen();
-			}),1000);
+			}),500);
 		}
 	}
 
@@ -217,7 +218,7 @@ var WorldEngine = (function(constructParams) {
 				_images = {};
 				for( i in data.images ) {
 					_images[i] = new Image();
-					_images[i].onload = _imageLoaded;
+					_images[i].onload = partial(_imageLoaded, i);
 					_images[i].src = data.images[i];
 				}
 			}
@@ -226,7 +227,7 @@ var WorldEngine = (function(constructParams) {
 				_avatars = {};
 				for( i in data.avatars ) {
 					_avatars[i] = new Image();
-					_avatars[i].onload = _imageLoaded;
+					_avatars[i].onload = partial(_imageLoaded, i);
 					_avatars[i].src = data.avatars[i];
 				}
 			}
