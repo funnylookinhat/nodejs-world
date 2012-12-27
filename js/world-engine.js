@@ -217,8 +217,8 @@ var WorldEngine = (function(constructParams) {
 				_images = {};
 				for( i in data.images ) {
 					_images[i] = new Image();
-					_images[i].src = data.images[i];
 					_images[i].onload = _imageLoaded(i);
+					_images[i].src = data.images[i];
 				}
 			}
 
@@ -226,8 +226,8 @@ var WorldEngine = (function(constructParams) {
 				_avatars = {};
 				for( i in data.avatars ) {
 					_avatars[i] = new Image();
-					_avatars[i].src = data.avatars[i];
 					_avatars[i].onload = _imageLoaded(i);
+					_avatars[i].src = data.avatars[i];
 				}
 			}
 
