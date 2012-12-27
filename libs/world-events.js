@@ -48,3 +48,9 @@ exports.sendChatMessage = (function (params) {
 		text: params.text
 	});
 });
+
+exports.confirmChatMessage = (function (params) {
+	params.socket.emit('serverConfirmChatMessage',{
+		text: params.text
+	});
+});

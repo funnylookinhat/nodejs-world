@@ -1,5 +1,22 @@
 <html>
+	<head>
+		<title>NodeJS-World Demo Client</title>
+		<link href="/css/world-client.css" rel="stylesheet" type="text/css" />
+	</head>
 	<body>
+		<div class="chat">
+			<div class="log"><ul id="chat-log">
+				<li>&nbsp;</li>
+				<li>&nbsp;</li>
+				<li>&nbsp;</li>
+				<li>&nbsp;</li>
+				<li>&nbsp;</li>
+				<li>&nbsp;</li>
+				<li>&nbsp;</li>
+				<li>&nbsp;</li>
+			</ul></div>
+			<div class="input"><input type="text" id="chat-input" placeholder="Send a message..."></div>
+		</div>
 		<div id="overlay" class="overlay">&nbsp;</div>
 		<div id="loading" class="loading">
 			<div id="loading-title" class="header" rel="NodeJS-World Demo Server">NodeJS-World Demo Server</div>
@@ -19,13 +36,14 @@
 		<script src="/socket.io/socket.io.js"></script>
 		<!-- <script type="text/javascript" src="/js/page.js"></script> -->
 		<script type="text/javascript" src="/js/help.js"></script>
-    	<script type="text/javascript" src="/js/world-engine.js"></script>
+    	<script type="text/javascript" src="/js/world-client.js"></script>
     	<script type="text/javascript" src="/js/test-engine.js"></script>
     	<script type="text/javascript">
     		$(function() {
-    			var engine = new WorldEngine({});
-    			engine.run();
+    			var client = new WorldClient({});
+    			client.run();
     		});
+    		// Comment out to enable test engine.
     		/*
     		var test = new TestEngine({});
     		setTimeout((function() {
@@ -33,160 +51,5 @@
     		}),5000);
 			*/
     	</script>
-		<style>
-			* {
-				-moz-box-sizing: border-box;
-				-webkit-box-sizing: border-box;
-				box-sizing: border-box;
-				outline: none;
-				font-family: "Arial";
-			}
-			html, body {
-				width: 100%;
-				height: 100%;
-				margin: 0px;
-				padding: 0px;
-				background: #414141;
-			}
-			.overlay {
-				position: fixed;
-				z-index: 2;
-				left: 0;
-				top: 0;
-				width: 100%;
-				height: 100%;
-				background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AwZERAwMDZoWgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAANSURBVAjXY3B0dNwMAAMBAXdVVoCrAAAAAElFTkSuQmCC');
-				background-repeat: repeat;
-				display: none;
-			}
-			.loading {
-				position: fixed;
-				z-index: 4;
-				left: 50%;
-				top: 50%;
-				width: 400px;
-				height: 135px;
-				margin-left: -200px;
-				margin-top: -75px;
-				background-color: #efefef;
-				border: 1px solid #cccccc;
-				-webkit-border-radius: 10px;
-				-moz-border-radius: 10px;
-				border-radius: 10px;
-				padding: 10px;
-				display: none;
-			}
-			.login {
-				position: fixed;
-				z-index: 3;
-				left: 50%;
-				top: 5%;
-				width: 450px;
-				height: 365px;
-				margin-left: -225px;
-				background-color: #efefef;
-				border: 1px solid #cccccc;
-				-webkit-border-radius: 10px;
-				-moz-border-radius: 10px;
-				border-radius: 10px;
-				padding: 10px;
-				display: none;
-			}
-			.loading .header, .login .header {
-				text-align: center;
-				font-size: 18px;
-				line-height: 24px;
-				margin-bottom: 6px;
-			}
-			.loading .subheader {
-				text-align: center;
-				font-size: 14px;
-				line-height: 16px;
-				font-weight: bold;
-				margin-bottom: 6px;
-			}
-			.loading .label, .login .label {
-				text-align: left;
-				font-size: 14px;
-				line-height: 16px;
-				margin-bottom: 4px;
-			}
-			.loading .progress {
-				width: 340px;
-				height: 30px;
-				border: 1px solid #cccccc;
-				margin: 10px 20px;
-			}
-			.loading .progress .carrier {
-				height: 30px;
-				width: 30%;
-				background: #336699;
-			}
-			.login .input {
-				text-align: left;
-			}
-			.login .input input[type="text"], .login .input input[type="password"] {
-				width: 100%;
-				border: 1px solid #999999;
-				-webkit-border-radius: 5px;
-				-moz-border-radius: 5px;
-				border-radius: 5px;
-				height: 28px;
-				padding: 4px;
-				line-height: 14px;
-				font-size: 14px;
-				margin-bottom: 10px;
-			}
-			.login .avatars {
-				width: 100%;
-				height: 200px;
-				overflow-y: scroll;
-				background-color: #ffffff;
-				border: 1px solid #999999;
-				-webkit-border-radius: 5px;
-				-moz-border-radius: 5px;
-				border-radius: 5px;
-			}
-			.login .avatars .avatar {
-				float: left;
-				width: 100px;
-				height: 100px;
-				text-align: center;
-			}
-			.login .avatars .avatar a {
-				display: inline-block;
-			}
-			.login .avatars .avatar.selected {
-				background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AwaFyAYzP0lDwAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAANSURBVAjXYzBOm7kZAAPoAeaBrUIdAAAAAElFTkSuQmCC');
-				background-repeat:repeat;
-			}
-			.login .actions {
-				height: 30px;
-				margin: 10px 0px 0px 0px;
-			}
-			.login .actions .button {
-				float: right;
-				height: 28px;
-				padding-top: 6px;
-				padding-left: 4px;
-				padding-right: 4px;
-				line-height: 14px;
-				font-size: 14px;
-				vertical-align: bottom;
-				min-width: 100px;
-				text-align: center;
-				font-weight: bold;
-				color: #000000;
-				background-color: #8eb4d8;
-				border: 1px solid #999999;
-				-webkit-border-radius: 5px;
-				-moz-border-radius: 5px;
-				border-radius: 5px;
-				text-decoration: none;
-			}
-			.login .actions .button:hover {
-				background-color: #a2bdd8;
-			}
-		</style>
 	</body>
 </html>

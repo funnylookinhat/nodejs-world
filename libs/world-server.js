@@ -96,6 +96,10 @@ exports = module.exports = function(params) {
 				dataAvatar = _default_avatar;
 			}
 			
+			if( dataName.length > 16 ) {
+				dataName = dataName.substring(0,16);
+			}
+
 			// These should be loaded from a config file.
 			var dataWidth = 32;
 			var dataHeight = 48;
@@ -152,10 +156,9 @@ exports = module.exports = function(params) {
 				return;
 			}
 			if( data.text != undefined ) {
-				worldEvents.sendChatMessage({
+				worldEvents.confirmChatMessage({
 					socket: socket,
 					text: data.text,
-					entity_id: socket.id
 				});
 
 				worldEvents.sendChatMessage({

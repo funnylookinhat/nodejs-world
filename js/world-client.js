@@ -4,7 +4,7 @@
  * Networking client and game engine.
  */
 
-var WorldEngine = (function(constructParams) {
+var WorldClient = (function(constructParams) {
 	// Private Variable
 	var _images,
 		_avatars,
@@ -141,6 +141,15 @@ var WorldEngine = (function(constructParams) {
 		$('#login').hide();
 		$('#overlay').hide();
 	}
+
+	_pageChatAddMessage = function(name,text) {
+		$newMessage = $('<li></li>');
+		$newMessage.html(name+': '+text);
+		$('#chat-log').append($newMessage);
+		$('#chat-log').closest('.log').animate({
+			scrollTop: $('#chat-log').height()
+		}, "fast");
+	}
 	
 	// Needs to be defined before __construct
 	_fitCanvas = function() {
@@ -151,7 +160,8 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	_keyDown = function(keyCode) {
-		if( _character != undefined && 
+		if( ! $('#chat-input').is(':focus') &&
+			_character != undefined && 
 			_movementKeys[keyCode] != undefined &&
 			_pressedKeysValues[keyCode] == null ) {
 			_pressedKeysValues[keyCode] = _movementKeys[keyCode];
@@ -160,11 +170,16 @@ var WorldEngine = (function(constructParams) {
 	}
 
 	_keyUp = function(keyCode) {
-		if( _character != undefined && 
+		if( ! $('#chat-input').is(':focus') &&
+			_character != undefined && 
 			_movementKeys[keyCode] != undefined &&
 			_pressedKeysValues[keyCode] != null ) {
 			_pressedKeysValues[keyCode] = null;
 			_updateCharacterMovement();
+		} else if ( $('#chat-input').is(':focus') &&
+					keyCode == 13 ) {
+			_sendChatMessage($('#chat-input').val());
+			$('#chat-input').val('');
 		}
 	}
 
@@ -298,6 +313,23 @@ var WorldEngine = (function(constructParams) {
 			}
 		});
 
+		_socket.on('serverSendChatMessage', function (data) {
+			if( data.entity_id != undefined &&
+				_entities[data.entity_id] != undefined &&
+				data.text != undefined &&
+				data.text.length != 0 ) {
+				_pageChatAddMessage(_entities[data.entity_id].name,data.text);
+			}
+		});
+
+		_socket.on('serverConfirmChatMessage', function (data) {
+			if( _character != undefined &&
+				data.text != undefined &&
+				data.text.length != 0 ) {
+				_pageChatAddMessage(_character.name,data.text);
+			}
+		});
+
 	}
 
 	_sendRequestEntities = function() {
@@ -317,6 +349,12 @@ var WorldEngine = (function(constructParams) {
 			speed: _character.speed,
 			x: _character.x,
 			y: _character.y
+		});
+	}
+
+	_sendChatMessage = function(text) {
+		_socket.emit('clientSendChatMessage',{
+			text: text
 		});
 	}
 
