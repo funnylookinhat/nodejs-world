@@ -14,6 +14,7 @@ var WorldClient = (function(constructParams) {
 		_world,
 		_worldGroundPattern,
 		_worldGroundCanvas,
+		_entityMessageCanvas,
 		_imagesLoaded,
 		_imagesCount,
 		_imagesTotal,
@@ -319,6 +320,8 @@ var WorldClient = (function(constructParams) {
 				data.text != undefined &&
 				data.text.length != 0 ) {
 				_pageChatAddMessage(_entities[data.entity_id].name,data.text);
+				_entities[data.entity_id].message = data.text;
+				_entities[data.entity_id].messageTime = ( Date.now() / 1000 );
 			}
 		});
 
@@ -327,6 +330,8 @@ var WorldClient = (function(constructParams) {
 				data.text != undefined &&
 				data.text.length != 0 ) {
 				_pageChatAddMessage(_character.name,data.text);
+				_character.message = data.text;
+				_character.messageTime = ( Date.now() / 1000 );
 			}
 		});
 
@@ -495,6 +500,93 @@ var WorldClient = (function(constructParams) {
 			inBoxCoordinateY(entity,frameBox), //character.y,//Math.floor( Math.floor(context.canvas.height / 2) - ( character.image.height / numFrames / 2 ) ), 
 			( _avatars[entity.avatar].width / _AVATAR_SPRITE_FRAMES_X ), 
 			( _avatars[entity.avatar].height / _AVATAR_SPRITE_FRAMES_Y ));
+
+		if( entity.message != undefined &&
+			entity.message != false ) {
+			if( ( entity.messageTime + 5 ) >= ( Date.now() / 1000 ) ) {
+				// Draw
+				_drawEntityMessage(entity,frameBox);
+			} else {
+				entity.message = false;
+				entity.messageTime = false;
+			}
+		}
+	}
+
+	_drawRoundRect = function(context, x, y, width, height, radius, fill, stroke) {
+		if (typeof stroke == "undefined" ) {
+			stroke = true;
+		}
+		if (typeof radius === "undefined") {
+			radius = 5;
+		}
+		context.beginPath();
+		context.moveTo(x + radius, y);
+		context.lineTo(x + width - radius, y);
+		context.quadraticCurveTo(x + width, y, x + width, y + radius);
+		context.lineTo(x + width, y + height - radius);
+		context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+		context.lineTo(x + radius, y + height);
+		context.quadraticCurveTo(x, y + height, x, y + height - radius);
+		context.lineTo(x, y + radius);
+		context.quadraticCurveTo(x, y, x + radius, y);
+		context.closePath();
+		if (stroke) {
+			context.stroke();
+		}
+		if (fill) {
+			context.fill();
+		}
+	}
+
+	_drawEntityMessage = function(entity,frameBox) {
+		// TODO - IMPLEMENT _entityMessageCanvas AS CACHE
+		/*
+		if( _entityMessageCanvas == undefined ) {
+			_entityMessageCanvas = document.createElement('canvas');
+		}
+		*/
+		
+		var tempCanvas = document.createElement('canvas');
+		var tempContext = tempCanvas.getContext('2d');
+		tempContext.font = "normal 14px Arial";
+		tempContext.fillStyle = "rgba(33,33,33,1)";
+		if( tempContext.measureText(entity.message).width < 230 ) {
+			tempContext.textAlign = 'center';
+			tempContext.fillText(entity.message,115,14);
+		} else {
+			tempContext.fillText(entity.message,0,14);	
+		}
+
+		var rectPos = {
+			x: entity.x,
+			y: entity.y - 50,
+			width: 250,
+			height: 35
+		};
+		_context.strokeStyle = "rgba(255, 255, 255, 1)";
+		_context.fillStyle = "rgba(255, 255, 255, .8)";
+		_drawRoundRect( 
+			_context, 
+			inBoxCoordinateX(rectPos,frameBox),
+			inBoxCoordinateY(rectPos,frameBox), 
+			rectPos.width, 
+			rectPos.height, 
+			10, 
+			true, 
+			true
+		); 
+		_context.drawImage(
+			tempCanvas,
+			0,
+			0,
+			230,
+			24,
+			inBoxCoordinateX(rectPos,frameBox)+5,
+			(inBoxCoordinateY(rectPos,frameBox)+10),
+			230,
+			24
+		);
 	}
 
 	_drawSceneBackground = function(frameBox,frame) {
