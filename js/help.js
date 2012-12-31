@@ -44,3 +44,27 @@ function partial(func /*, 0..n args */) {
     return func.apply(this, allArguments);
   };
 }
+
+/**
+ * Math Stuff - Should move this elsewhere ? In some common/helper.js or something
+ */
+
+function getAngle(x1,y1,x2,y2) {
+    var dX = Math.round(x1 - x2);
+    var dY = Math.round(y1 - y2);
+    var angle = Math.round(Math.atan2(dX, dY) / Math.PI * 180) + 90;
+    if( angle < 0 ) {
+      angle += 360;
+    }
+    return angle;
+  }
+
+  function getDx(angle,speed) {
+    var theta = angle * Math.PI / 180
+    return Math.round(10 * speed * Math.cos(theta)) / 10;
+  }
+
+  function getDy(angle,speed) {
+    var theta = angle * Math.PI / 180
+    return Math.round(10 * speed * Math.sin(theta)) / 10;
+  }

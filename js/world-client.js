@@ -1,7 +1,7 @@
 /**
  * NodeJS-World
- * world-engine.js
- * Networking client and game engine.
+ * world-client.js
+ * Networking client and render engine.
  */
 
 var WorldClient = (function(constructParams) {
@@ -27,7 +27,8 @@ var WorldClient = (function(constructParams) {
 		_SCREEN_HEIGHT,
 		_frame,
 		_FPS,
-		_lastTime;
+		_lastTime,
+		_worldEngine;
 
 	var _AVATAR_SPRITE_FRAMES_X = 4,	// Animation is in 4 frames. - From server?
 		_AVATAR_SPRITE_FRAMES_Y = 4;	// Quad-Directional - From server?
@@ -195,7 +196,7 @@ var WorldClient = (function(constructParams) {
 		}
 		if( dX != 0 ||
 			dY != 0 ) {
-			_character.speed = 4;
+			_character.speed = 5;
 			_character.angle = getAngle(0,0,dX,dY);
 		} else {
 			_character.speed = 0;
@@ -252,7 +253,10 @@ var WorldClient = (function(constructParams) {
 			if( data.world != undefined ) {
 				_world = data.world;
 			}
-
+			_worldEngine = new WorldEngine({
+				world: _world,
+				FPS: _FPS
+			});
 			_sendRequestEntities();
 
 		});
@@ -582,7 +586,7 @@ var WorldClient = (function(constructParams) {
 			0,
 			230,
 			24,
-			inBoxCoordinateX(rectPos,frameBox)+5,
+			inBoxCoordinateX(rectPos,frameBox)+10,
 			(inBoxCoordinateY(rectPos,frameBox)+10),
 			230,
 			24
@@ -693,6 +697,7 @@ var WorldClient = (function(constructParams) {
 		}
 	}
 
+	/*
 	// Should eventually be renamed to updateFrame or something
 	_updateEntities = function() {
 		var timeDelta = Date.now() - _lastTime;
@@ -722,6 +727,7 @@ var WorldClient = (function(constructParams) {
 		}
 		return entity;
 	}
+	*/
 
 	// There has got to be a better way to store these and call them...
 	function inBox(item,box) {
@@ -748,6 +754,7 @@ var WorldClient = (function(constructParams) {
 		return Math.floor(item.y - box.ymin);
 	}
 
+	/*
 	function getAngle(x1,y1,x2,y2) {
 		var dX = Math.round(x1 - x2);
 		var dY = Math.round(y1 - y2);
@@ -767,10 +774,14 @@ var WorldClient = (function(constructParams) {
 		var theta = angle * Math.PI / 180
 		return Math.round(10 * speed * Math.sin(theta)) / 10;
 	}
+	*/
 
 	_mainLoop = function() {
 		_drawFrame( ( _frame < _FPS ? ++_frame : _frame = 0 ) );
-		_updateEntities();
+		// _updateEntities();
+		if( _worldEngine != undefined ) {
+			_worldEngine.updateFrame(_character,_entities);
+		}
 	}
 
 	// Thanks Paul Irish.

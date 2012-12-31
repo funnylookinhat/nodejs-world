@@ -33,7 +33,7 @@ exports = module.exports = function(params) {
 			image: 'grass',
 		}
 	};
-	
+
 	// Generate Random World.
 	for( var i = 0; i < 5000; i++ ) {
 		image = 'flower1';
@@ -61,12 +61,20 @@ exports = module.exports = function(params) {
 			height = 151;
 			solid = true;
 		}
+
+		randX = Math.round( Math.random() * _world.width );
+		randY = Math.round( Math.random() * _world.height );
+
 		_world.pieces.push({
 			image: image,
 			width: width,
 			height: height,
-			x: Math.round( Math.random() * _world.width ),
-			y: Math.round( Math.random() * _world.height ),
+			x: randX,
+			y: randY,
+			xmin: ( randX - ( width / 2 ) ),
+			xmax: ( randX + ( width / 2 ) ),
+			ymin: ( randY - ( width / 2 ) ),
+			ymax: ( randY + ( width / 2 ) ),
 			solid: solid
 		});
 	}

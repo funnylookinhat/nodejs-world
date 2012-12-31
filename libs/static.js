@@ -29,6 +29,11 @@ exports = module.exports = function(params) {
 		res.sendfile(baseDirectory+'/js/'+req.params[0]);
 	});
 
+	// COMMON
+	app.get('/common/*', function(req, res) {
+		res.sendfile(baseDirectory+'/common/'+req.params[0]);
+	});
+
 	// index.html
 	app.get('/', function (req, res) {
 	  res.sendfile(baseDirectory + '/index.html');
