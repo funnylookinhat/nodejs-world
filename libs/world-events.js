@@ -2,6 +2,12 @@
  * Socket IO actions that world-server calls.
  */
 
+exports.sendPong = (function (params) {
+	params.socket.emit('serverPong',{
+		timestamp: params.timestamp
+	});
+});
+
 exports.sendWorldData = (function (params) {
 	params.socket.emit('serverWorldData',{
 		images: params.images,

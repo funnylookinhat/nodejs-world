@@ -18,6 +18,7 @@ var WorldClient = (function(constructParams) {
 		_imagesLoaded,
 		_imagesCount,
 		_imagesTotal,
+		_latency,
 		/* _backgroundCanvas, */	// Used for drawing the entire background out then copying in.
 									// More memory ( 5x ) for a minor drop in CPU.
 		_socket,
@@ -137,6 +138,17 @@ var WorldClient = (function(constructParams) {
 			_pageLoadingShow(false,"Logging in.",0,"Generating your character.");
 			_sendCharacterLogin($username.val(),$avatar.attr('rel'));
 		});
+	}
+
+	_pageUpdateLatency = function(latency) {
+		$('#latency').removeClass('red').removeClass('yellow').removeClass('green');
+		$newClass = 'green';
+		if( latency > 100 && latency < 250 ) {
+			$newClass = 'yellow';
+		} else if( latency >= 250 ) {
+			$newClass = 'red';
+		}
+		$('#latency').addClass($newClass).html(latency+'ms');
 	}
 
 	_pageLoginHide = function() {
@@ -339,6 +351,17 @@ var WorldClient = (function(constructParams) {
 			}
 		});
 
+		_socket.on('serverPong', function (data) {
+			_latency = ( Date.now() - data.timestamp );
+			_pageUpdateLatency(_latency);
+		});
+
+	}
+
+	_checkLatency = function() {
+		_socket.emit('clientPing',{
+			timestamp: Date.now()
+		});
 	}
 
 	_sendRequestEntities = function() {
@@ -400,6 +423,7 @@ var WorldClient = (function(constructParams) {
 		_imagesLoaded = false;
 		_imagesTotal = 0;
 		_imagesCount = 0;
+		_latency = 0;
 
 		_entities = {};
 		
@@ -781,6 +805,9 @@ var WorldClient = (function(constructParams) {
 		// _updateEntities();
 		if( _worldEngine != undefined ) {
 			_worldEngine.updateFrame(_character,_entities);
+		}
+		if( _frame == 0 ) {
+			_checkLatency();
 		}
 	}
 

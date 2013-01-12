@@ -161,6 +161,29 @@ canvas {
 	z-index: 1;
 }
 
+#latency {
+	width: 50px;
+	height: 20px;
+	font-size: 12px;
+	padding: 4px;
+	color: #000000;
+	background: #414141;
+	border: 1px solid #333333;
+	position: absolute;
+	top: 5px;
+	left: 5px;
+}
+
+#latency.red {
+	color: #a61000;
+}
+#latency.yellow {
+	color: #ffb000;
+}
+#latency.green {
+	color: #00c12b;
+}
+
 .chat {
 	z-index: 2;
 	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AwZEQsiarnSiAAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAANSURBVAjXY3B0dEwDAAK0ASolOzKVAAAAAElFTkSuQmCC');

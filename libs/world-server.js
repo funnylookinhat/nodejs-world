@@ -93,6 +93,13 @@ exports = module.exports = function(params) {
 			entities: _entities
 		});
 
+		socket.on('clientPing', function (data) {
+			worldEvents.sendPong({
+				socket: socket,
+				timestamp: data.timestamp
+			});
+		});
+
 		socket.on('clientCharacterLogin', function (data) {
 			// TODO - Validate avatar information and whatnot.
 			var dataName = data.name != undefined ? data.name : "Nobody";
